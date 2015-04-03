@@ -13,6 +13,4 @@ Outra pasta que ele cria e' a build\Samples\. Essa e' a OGRE_SAMPLES a que me re
 Compilem uma vez. Depois de compilarem uma vez, vao aos settings do projecto->c/c++->Precompiled Headers->Precompiled Header->Use.
 Isto e' mais para demorar menos tempo a recompilar coisas.
 
-No Post-build Event, em Command Line, substituam onde esta' $(OGRE_HOME) pela directoria equivalente. Julgo que ele nao interpreta o valor da variavel dentro desta seccao.
-
 QQ coisa, digam.
