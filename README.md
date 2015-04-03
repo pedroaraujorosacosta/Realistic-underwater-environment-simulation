@@ -13,4 +13,6 @@ Outra pasta que ele cria e' a build\Samples\. Essa e' a OGRE_SAMPLES a que me re
 Compilem uma vez. Depois de compilarem uma vez, vao aos settings do projecto->c/c++->Precompiled Headers->Precompiled Header->Use.
 Isto e' mais para demorar menos tempo a recompilar coisas.
 
+Also, coloquem o ficheiro *.dat (que o gerador de terreno cria na pasta bin da sdk ao lado do executavel) na pasta de media apontada pelo ficheiro de recursos. Senao o gerador de terreno julga sempre que tem de regerar o terreno.
+
 QQ coisa, digam.
