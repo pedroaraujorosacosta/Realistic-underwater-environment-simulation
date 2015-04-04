@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Submarine.h"
 
 //-------------------------------------------------------------------------------------
 Application::Application(void)
@@ -108,15 +109,23 @@ void Application::configureTerrainDefaults(Ogre::Light* light)
 //-------------------------------------------------------------------------------------
 void Application::createScene(void)
 {
-	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
-	mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
+	//mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
+	//mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
+	
 	mCamera->setNearClipDistance(0.1f);
 	mCamera->setFarClipDistance(50000.0f);
 
 	if (mRoot->getRenderSystem()->getCapabilities()->hasCapability(Ogre::RSC_INFINITE_FAR_PLANE))
-	{
 		mCamera->setFarClipDistance(0);   // enable infinite far clip distance if we can
-	}
+
+	/*Ogre::Entity* sub = mSceneMgr->createEntity("Sub", "Sub.mesh");
+	Ogre::SceneNode* subNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	subNode->attachObject(sub);
+	subNode->setPosition(Ogre::Vector3(1963, 50, 1660));
+	subNode->setScale(Ogre::Vector3(0.05f, 0.05f, 0.05f));*/
+
+	sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
+	sub->attachCamera(mCamera);
 
 	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
 	lightdir.normalise();
@@ -202,6 +211,8 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		}
 	}
 
+	sub->update(evt.timeSinceLastFrame);
+
 	return ret;
 }
 
@@ -239,3 +250,145 @@ extern "C" {
 #endif
 
 //---------------------------------------------------------------------------
+
+// OIS::MouseListeners
+bool Application::mouseMoved(const OIS::MouseEvent& evt)
+{
+	//sub->addRotations(0.13f * evt.state.X.rel, 0.13f * evt.state.Y.rel, 0.0f);
+	mCamera->yaw(Ogre::Degree(-0.13f * evt.state.X.rel));
+	mCamera->pitch(Ogre::Degree(-0.13f * evt.state.Y.rel));
+	return true;
+}
+
+bool Application::mousePressed(const OIS::MouseEvent& evt, OIS::MouseButtonID id)
+{
+	return true;
+}
+
+bool Application::mouseReleased(const OIS::MouseEvent& evt, OIS::MouseButtonID id)
+{
+	return true;
+}
+//---------------------------------------------------------------------------
+bool Application::keyPressed(const OIS::KeyEvent &arg)
+{
+	if (mTrayMgr->isDialogVisible()) return true;   // don't process any more keys if dialog is up
+
+	if (arg.key == OIS::KC_F)   // toggle visibility of advanced frame stats
+	{
+		mTrayMgr->toggleAdvancedFrameStats();
+	}
+	else if (arg.key == OIS::KC_G)   // toggle visibility of even rarer debugging details
+	{
+		if (mDetailsPanel->getTrayLocation() == OgreBites::TL_NONE)
+		{
+			mTrayMgr->moveWidgetToTray(mDetailsPanel, OgreBites::TL_TOPRIGHT, 0);
+			mDetailsPanel->show();
+		}
+		else
+		{
+			mTrayMgr->removeWidgetFromTray(mDetailsPanel);
+			mDetailsPanel->hide();
+		}
+	}
+	else if (arg.key == OIS::KC_T)   // cycle polygon rendering mode
+	{
+		Ogre::String newVal;
+		Ogre::TextureFilterOptions tfo;
+		unsigned int aniso;
+
+		switch (mDetailsPanel->getParamValue(9).asUTF8()[0])
+		{
+		case 'B':
+			newVal = "Trilinear";
+			tfo = Ogre::TFO_TRILINEAR;
+			aniso = 1;
+			break;
+		case 'T':
+			newVal = "Anisotropic";
+			tfo = Ogre::TFO_ANISOTROPIC;
+			aniso = 8;
+			break;
+		case 'A':
+			newVal = "None";
+			tfo = Ogre::TFO_NONE;
+			aniso = 1;
+			break;
+		default:
+			newVal = "Bilinear";
+			tfo = Ogre::TFO_BILINEAR;
+			aniso = 1;
+		}
+
+		Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(tfo);
+		Ogre::MaterialManager::getSingleton().setDefaultAnisotropy(aniso);
+		mDetailsPanel->setParamValue(9, newVal);
+	}
+	else if (arg.key == OIS::KC_R)   // cycle polygon rendering mode
+	{
+		Ogre::String newVal;
+		Ogre::PolygonMode pm;
+
+		switch (mCamera->getPolygonMode())
+		{
+		case Ogre::PM_SOLID:
+			newVal = "Wireframe";
+			pm = Ogre::PM_WIREFRAME;
+			break;
+		case Ogre::PM_WIREFRAME:
+			newVal = "Points";
+			pm = Ogre::PM_POINTS;
+			break;
+		default:
+			newVal = "Solid";
+			pm = Ogre::PM_SOLID;
+		}
+
+		mCamera->setPolygonMode(pm);
+		mDetailsPanel->setParamValue(10, newVal);
+	}
+	else if (arg.key == OIS::KC_F5)   // refresh all textures
+	{
+		Ogre::TextureManager::getSingleton().reloadAll();
+	}
+	else if (arg.key == OIS::KC_SYSRQ)   // take a screenshot
+	{
+		mWindow->writeContentsToTimestampedFile("screenshot", ".jpg");
+	}
+	else if (arg.key == OIS::KC_ESCAPE)
+	{
+		mShutDown = true;
+	}
+	else if (arg.key == OIS::KC_A)
+	{
+		sub->turnRight(true);
+	}
+	else if (arg.key == OIS::KC_D)
+	{
+		sub->turnRight();
+	}
+	else if (arg.key == OIS::KC_W)
+	{
+		sub->moveFront();
+	}
+	else if (arg.key == OIS::KC_S)
+	{
+		sub->moveFront(true);
+	}
+
+	return true;
+}
+//---------------------------------------------------------------------------
+bool Application::keyReleased(const OIS::KeyEvent &arg)
+{
+	if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
+	{
+		sub->stopTurn();
+	}
+	else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
+	{
+		sub->stopMove();
+	}
+
+	return true;
+}

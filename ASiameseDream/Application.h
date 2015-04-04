@@ -6,6 +6,8 @@
 #include <Terrain/OgreTerrainGroup.h>
 #include "BaseApplication.h"
 
+class Submarine;
+
 class Application : public BaseApplication
 {
 private:
@@ -13,6 +15,9 @@ private:
 	Ogre::TerrainGroup* mTerrainGroup;
 	OgreBites::Label* mInfoLabel;
 	bool mTerrainsImported;
+
+	// Keep our objects here
+	Submarine* sub;
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);
@@ -26,6 +31,13 @@ protected:
 	virtual void createFrameListener(void);
 	virtual void destroyScene(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
+
+	// IO Listeners
+	virtual bool mouseMoved(const OIS::MouseEvent& evt);
+	virtual bool mousePressed(const OIS::MouseEvent& evt, OIS::MouseButtonID id);
+	virtual bool mouseReleased(const OIS::MouseEvent& evt, OIS::MouseButtonID id);
+	virtual bool keyPressed(const OIS::KeyEvent &arg);
+	virtual bool keyReleased(const OIS::KeyEvent &arg);
 };
 
 #endif
