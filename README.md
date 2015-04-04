@@ -2,10 +2,7 @@
 
 Vou colocando aqui coisas 'a medida que reparo que estavam em falta na configuracao.
 
-Esta solucao assume que as vars:
--OGRE_HOME
--OGRE_SAMPLES
-estao definidas.
+Esta solucao assume que as vars OGRE_HOME e OGRE_SAMPLES estao definidas.
 
 Qd fazemos build do ogre, ele cria uma pasta chamada build\sdk\. Essa pasta e' o que chamo o OGRE_HOME.
 Outra pasta que ele cria e' a build\Samples\. Essa e' a OGRE_SAMPLES a que me refiro nos settings do projecto.
