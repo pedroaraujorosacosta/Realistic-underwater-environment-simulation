@@ -1,9 +1,19 @@
 #include "Application.h"
 #include "Submarine.h"
 
+// includes for my GrammarParser lib
+#include "GrammarParser.h"
+#include "GrammarGenerator.h"
+#include "ProgramNode.h"
+#include "StandardOutputVisitor.h"
+#include "IdentifierNode.h"
+
+using namespace GeneratorNodes;
+
 //-------------------------------------------------------------------------------------
 Application::Application(void)
 {
+	sub = 0;
 }
 //-------------------------------------------------------------------------------------
 Application::~Application(void)
@@ -111,7 +121,7 @@ void Application::createScene(void)
 {
 	//mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
 	//mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
-	
+
 	mCamera->setNearClipDistance(0.1f);
 	mCamera->setFarClipDistance(50000.0f);
 
@@ -123,9 +133,12 @@ void Application::createScene(void)
 	subNode->attachObject(sub);
 	subNode->setPosition(Ogre::Vector3(1963, 50, 1660));
 	subNode->setScale(Ogre::Vector3(0.05f, 0.05f, 0.05f));*/
+	
+	/***Uncomment the following for the submarine***/
+	/*sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
+	sub->attachCamera(mCamera);*/
 
-	sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
-	sub->attachCamera(mCamera);
+	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
 
 	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
 	lightdir.normalise();
@@ -211,7 +224,7 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 		}
 	}
 
-	sub->update(evt.timeSinceLastFrame);
+	if (sub) sub->update(evt.timeSinceLastFrame);
 
 	return ret;
 }
@@ -361,19 +374,19 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_A)
 	{
-		sub->turnRight(true);
+		if (sub) sub->turnRight(true);
 	}
 	else if (arg.key == OIS::KC_D)
 	{
-		sub->turnRight();
+		if (sub) sub->turnRight();
 	}
 	else if (arg.key == OIS::KC_W)
 	{
-		sub->moveFront();
+		if (sub) sub->moveFront();
 	}
 	else if (arg.key == OIS::KC_S)
 	{
-		sub->moveFront(true);
+		if (sub) sub->moveFront(true);
 	}
 
 	return true;
@@ -383,12 +396,58 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 {
 	if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
 	{
-		sub->stopTurn();
+		if (sub) sub->stopTurn();
 	}
 	else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
 	{
-		sub->stopMove();
+		if (sub) sub->stopMove();
 	}
 
 	return true;
+}
+
+void Application::createPlant(const std::string& filename)
+{
+	GrammarParser gp;
+	std::vector<std::string> grammarText;
+	std::string line;
+	std::ifstream ifStream;
+
+	ifStream.open(filename);
+	if (ifStream.is_open())
+	{
+		// read and store the grammar file's lines
+		while (getline(ifStream, line))
+			grammarText.push_back(line);
+		ifStream.close();
+
+		// parse the grammar, get its rules
+		TokenInfo grammarRules;
+		gp.parseGrammar(grammarText, grammarRules);
+
+		ProgramNode grammar = *(ProgramNode*)grammarRules.tokenNode;
+
+		// print grammar
+		grammar.accept(new StandardOutputVisitor());
+
+		// Add two symbols to start with and evolve 3 generations
+		std::cout << std::endl << "*1st Generation*****************************" << std::endl << std::endl;
+		IdentifierNode* idNode = new IdentifierNode("s");
+		IdentifierNode* idNode2 = new IdentifierNode("A23a");
+		std::vector<const Node*> symbols;
+		symbols.push_back(idNode);
+		symbols.push_back(idNode2);
+		GrammarGenerator::generate(grammar, symbols);
+		GrammarGenerator::printSymbols(symbols);
+
+		std::cout << std::endl << "*2nd Generation*****************************" << std::endl << std::endl;
+		GrammarGenerator::generate(grammar, symbols);
+		GrammarGenerator::printSymbols(symbols);
+
+		std::cout << std::endl << "*3rd Generation*****************************" << std::endl << std::endl;
+		GrammarGenerator::generate(grammar, symbols);
+		GrammarGenerator::printSymbols(symbols);
+	}
+	else
+		std::cout << "Error: unable to open file: " << filename << std::endl;
 }

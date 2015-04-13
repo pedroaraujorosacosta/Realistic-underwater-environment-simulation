@@ -32,6 +32,8 @@ protected:
 	virtual void destroyScene(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
+	void createPlant(const std::string& filename);
+
 	// IO Listeners
 	virtual bool mouseMoved(const OIS::MouseEvent& evt);
 	virtual bool mousePressed(const OIS::MouseEvent& evt, OIS::MouseButtonID id);
