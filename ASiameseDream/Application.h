@@ -44,8 +44,7 @@ protected:
 	virtual void destroyScene(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
-	Ogre::SceneNode* createPlant(const std::string& filename, unsigned int numGenerations, 
-		Ogre::Vector3 position, SystemType type);
+	void createPlant(const std::string& filename, Plant_t& plant, SystemType type);
 
 	// IO Listeners
 	virtual bool mouseMoved(const OIS::MouseEvent& evt);

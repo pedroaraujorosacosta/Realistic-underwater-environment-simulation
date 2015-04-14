@@ -142,18 +142,15 @@ void Application::createScene(void)
 	// create the plants
 	plants[PYTHAGORAS_TREE].numGenerations = 3;
 	plants[PYTHAGORAS_TREE].plantLocation = Ogre::Vector3(1683, 49.7f, 2115);
-	plants[PYTHAGORAS_TREE].plantNode = createPlant("gram1.txt", plants[PYTHAGORAS_TREE].numGenerations,
-		plants[PYTHAGORAS_TREE].plantLocation, PYTHAGORAS_TREE);
+	createPlant("gram1.txt", plants[PYTHAGORAS_TREE], PYTHAGORAS_TREE);
 
 	plants[KOCH_CURVE].numGenerations = 3;
 	plants[KOCH_CURVE].plantLocation = Ogre::Vector3(1684, 49.7f, 2113);
-	plants[KOCH_CURVE].plantNode = createPlant("gram2.txt", plants[KOCH_CURVE].numGenerations,
-		plants[KOCH_CURVE].plantLocation, KOCH_CURVE);
+	createPlant("gram2.txt", plants[KOCH_CURVE], KOCH_CURVE);
 
 	plants[SIERPINSKY_TRI].numGenerations = 3;
 	plants[SIERPINSKY_TRI].plantLocation = Ogre::Vector3(1681, 49.7f, 2114);
-	plants[SIERPINSKY_TRI].plantNode = createPlant("gram3.txt", plants[SIERPINSKY_TRI].numGenerations,
-		plants[SIERPINSKY_TRI].plantLocation, SIERPINSKY_TRI);
+	createPlant("gram3.txt", plants[SIERPINSKY_TRI], SIERPINSKY_TRI);
 
 	// create material for the selector cube
 	selectMat = Ogre::MaterialManager::getSingleton().create(Ogre::String("selectMat").c_str(),
@@ -443,12 +440,9 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 		mSceneMgr->destroySceneNode(plants[PYTHAGORAS_TREE].plantNode);
 		mSceneMgr->destroySceneNode(plants[KOCH_CURVE].plantNode);
 		mSceneMgr->destroySceneNode(plants[SIERPINSKY_TRI].plantNode);
-		plants[PYTHAGORAS_TREE].plantNode = createPlant("gram1.txt", plants[PYTHAGORAS_TREE].numGenerations,
-			plants[PYTHAGORAS_TREE].plantLocation, PYTHAGORAS_TREE);
-		plants[KOCH_CURVE].plantNode = createPlant("gram2.txt", plants[KOCH_CURVE].numGenerations,
-			plants[KOCH_CURVE].plantLocation, KOCH_CURVE);
-		plants[SIERPINSKY_TRI].plantNode = createPlant("gram3.txt", plants[SIERPINSKY_TRI].numGenerations,
-			plants[SIERPINSKY_TRI].plantLocation, SIERPINSKY_TRI);
+		createPlant("gram1.txt", plants[PYTHAGORAS_TREE], PYTHAGORAS_TREE);
+		createPlant("gram2.txt", plants[KOCH_CURVE], KOCH_CURVE);
+		createPlant("gram3.txt", plants[SIERPINSKY_TRI], SIERPINSKY_TRI);
 		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 		cubeNode->attachObject(selectorCube);
 		cubeNode->setScale(0.2f, 0.06f, 0.1f);
@@ -461,12 +455,9 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 		mSceneMgr->destroySceneNode(plants[PYTHAGORAS_TREE].plantNode);
 		mSceneMgr->destroySceneNode(plants[KOCH_CURVE].plantNode);
 		mSceneMgr->destroySceneNode(plants[SIERPINSKY_TRI].plantNode);
-		plants[PYTHAGORAS_TREE].plantNode = createPlant("gram1.txt", plants[PYTHAGORAS_TREE].numGenerations,
-			plants[PYTHAGORAS_TREE].plantLocation, PYTHAGORAS_TREE);
-		plants[KOCH_CURVE].plantNode = createPlant("gram2.txt", plants[KOCH_CURVE].numGenerations,
-			plants[KOCH_CURVE].plantLocation, KOCH_CURVE);
-		plants[SIERPINSKY_TRI].plantNode = createPlant("gram3.txt", plants[SIERPINSKY_TRI].numGenerations,
-			plants[SIERPINSKY_TRI].plantLocation, SIERPINSKY_TRI);
+		createPlant("gram1.txt", plants[PYTHAGORAS_TREE], PYTHAGORAS_TREE);
+		createPlant("gram2.txt", plants[KOCH_CURVE], KOCH_CURVE);
+		createPlant("gram3.txt", plants[SIERPINSKY_TRI], SIERPINSKY_TRI);
 		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 		cubeNode->attachObject(selectorCube);
 		cubeNode->setScale(0.2f, 0.06f, 0.1f);
@@ -514,8 +505,7 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 	return true;
 }
 
-Ogre::SceneNode* Application::createPlant(const std::string& filename, unsigned int numGenerations,
-	Ogre::Vector3 position, SystemType type)
+void Application::createPlant(const std::string& filename, Plant_t& plant, SystemType type)
 {
 	GrammarParser gp;
 	std::vector<std::string> grammarText;
@@ -568,11 +558,11 @@ Ogre::SceneNode* Application::createPlant(const std::string& filename, unsigned 
 		if (idNode) symbols.push_back(idNode);
 
 		// Renderer visitor - will create our entities according to the grammar nodes it visits
-		Ogre::SceneNode* sceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-		RendererVisitor rendererVis(mSceneMgr, sceneNode, position, name, angle);
+		plant.plantNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, name, angle);
 
 		// Evolve the generations
-		for (unsigned int i = 0; i < numGenerations; i++)
+		for (unsigned int i = 0; i < plant.numGenerations; i++)
 		{
 			GrammarGenerator::generate(grammar, symbols);
 			GrammarGenerator::printSymbols(symbols);
@@ -581,12 +571,10 @@ Ogre::SceneNode* Application::createPlant(const std::string& filename, unsigned 
 		// Semantic processing of resulting parse tree, adding entities to ogre
 		for (std::vector<Node*>::iterator it = symbols.begin(); it != symbols.end(); it++)
 			(*it)->accept(&rendererVis);
-
-		return sceneNode;
 	}
 	else
 	{
 		std::cout << "Error: unable to open file: " << filename << std::endl;
-		return 0;
+		plant.plantNode = 0;
 	}
 }
