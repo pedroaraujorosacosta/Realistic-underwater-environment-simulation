@@ -75,6 +75,9 @@
     <ClCompile Include="StandardOutputVisitor.cpp">
       <Filter>Source Files\Grammar</Filter>
     </ClCompile>
+    <ClCompile Include="MovableText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseApplication.h">
@@ -136,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="NodeVisitor.h">
       <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="MovableText.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

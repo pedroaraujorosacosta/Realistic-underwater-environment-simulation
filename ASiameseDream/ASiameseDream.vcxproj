@@ -91,6 +91,7 @@
     <ClCompile Include="IdentifierNode.cpp" />
     <ClCompile Include="LeftBracketNode.cpp" />
     <ClCompile Include="MinusNode.cpp" />
+    <ClCompile Include="MovableText.cpp" />
     <ClCompile Include="PlusNode.cpp" />
     <ClCompile Include="ProgramNode.cpp" />
     <ClCompile Include="RendererVisitor.cpp" />
@@ -113,6 +114,7 @@
     <ClInclude Include="IdentifierNode.h" />
     <ClInclude Include="LeftBracketNode.h" />
     <ClInclude Include="MinusNode.h" />
+    <ClInclude Include="MovableText.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="NodeVisitor.h" />
     <ClInclude Include="PlusNode.h" />

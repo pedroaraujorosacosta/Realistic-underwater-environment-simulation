@@ -4,12 +4,12 @@
 
 using namespace GeneratorNodes;
 
-void GrammarGenerator::generate(const ProgramNode& grammar, std::vector<const Node*>& symbols)
+void GrammarGenerator::generate(const ProgramNode& grammar, std::vector<Node*>& symbols)
 {
-	std::vector<const Node*> out;
+	std::vector<Node*> out;
 
 	size_t i = 0;
-	for (std::vector<const Node*>::const_iterator it = symbols.begin(); it != symbols.end(); it++)
+	for (std::vector<Node*>::const_iterator it = symbols.begin(); it != symbols.end(); it++)
 	{
 		const Node* consequent = grammar.getConsequent(*it);
 		if (consequent)
@@ -28,8 +28,8 @@ void GrammarGenerator::generate(const ProgramNode& grammar, std::vector<const No
 	symbols = out;
 }
 
-void GrammarGenerator::printSymbols(std::vector<const GeneratorNodes::Node*>& symbols)
+void GrammarGenerator::printSymbols(std::vector<GeneratorNodes::Node*>& symbols)
 {
-	for (std::vector<const Node*>::const_iterator it = symbols.begin(); it != symbols.end(); it++)
+	for (std::vector<Node*>::const_iterator it = symbols.begin(); it != symbols.end(); it++)
 		std::cout << (*it)->getName() << std::endl;
 }

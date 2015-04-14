@@ -15,8 +15,8 @@ namespace GeneratorNodes
 
 		virtual void print() const;
 
-		virtual void accept(RendererVisitor* rv) const;
-		virtual void accept(StandardOutputVisitor* stdo) const;
+		virtual void accept(StandardOutputVisitor* rv);
+		virtual void accept(RendererVisitor* rv);
 	};
 }
 #endif

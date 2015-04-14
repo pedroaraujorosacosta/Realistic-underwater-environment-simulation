@@ -6,6 +6,7 @@
 #include "GrammarGenerator.h"
 #include "ProgramNode.h"
 #include "StandardOutputVisitor.h"
+#include "RendererVisitor.h"
 #include "IdentifierNode.h"
 
 using namespace GeneratorNodes;
@@ -138,6 +139,13 @@ void Application::createScene(void)
 	/*sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
 	sub->attachCamera(mCamera);*/
 
+	numGenerations = 3;
+	pythagorasLocation = Ogre::Vector3(1683, 49.7f, 2115);
+	pythagorasTree = createPlant("gram1.txt", numGenerations, pythagorasLocation, SystemType::PYTHAGORAS_TREE);
+
+	kochCurveLocation = Ogre::Vector3(1684, 49.7f, 2113);
+	kochCurve = createPlant("gram2.txt", numGenerations, kochCurveLocation, SystemType::KOCH_CURVE);
+
 	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
 
 	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
@@ -225,6 +233,13 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 
 	if (sub) sub->update(evt.timeSinceLastFrame);
+
+	// update camera position - TODO: remove this when project is integrated
+	Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
+	Ogre::Vector3 directionY = - (mCamera->getOrientation() * Ogre::Vector3::UNIT_Z);
+	Ogre::Vector3 newPosition = mCamera->getPosition() + directionX * cameraVelocity.x * evt.timeSinceLastFrame + 
+		directionY * cameraVelocity.y * evt.timeSinceLastFrame;
+	mCamera->setPosition(newPosition);
 
 	return ret;
 }
@@ -374,19 +389,39 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_A)
 	{
-		if (sub) sub->turnRight(true);
+		//if (sub) sub->turnRight(true);
+		cameraVelocity.x = -1.0f;
 	}
 	else if (arg.key == OIS::KC_D)
 	{
-		if (sub) sub->turnRight();
+		//if (sub) sub->turnRight();
+		cameraVelocity.x = 1.0f;
 	}
 	else if (arg.key == OIS::KC_W)
 	{
-		if (sub) sub->moveFront();
+		//if (sub) sub->moveFront();
+		cameraVelocity.y = 1.0f;
 	}
 	else if (arg.key == OIS::KC_S)
 	{
-		if (sub) sub->moveFront(true);
+		//if (sub) sub->moveFront(true);
+		cameraVelocity.y = -1.0f;
+	}
+	else if (arg.key == OIS::KC_ADD)
+	{
+		numGenerations++;
+		mSceneMgr->destroySceneNode(pythagorasTree);
+		mSceneMgr->destroySceneNode(kochCurve);
+		pythagorasTree = createPlant("gram1.txt", numGenerations, pythagorasLocation, SystemType::PYTHAGORAS_TREE);
+		kochCurve = createPlant("gram2.txt", numGenerations, kochCurveLocation, SystemType::KOCH_CURVE);
+	}
+	else if (arg.key == OIS::KC_SUBTRACT)
+	{
+		numGenerations--;
+		mSceneMgr->destroySceneNode(pythagorasTree);
+		mSceneMgr->destroySceneNode(kochCurve);
+		pythagorasTree = createPlant("gram1.txt", numGenerations, pythagorasLocation, SystemType::PYTHAGORAS_TREE);
+		kochCurve = createPlant("gram2.txt", numGenerations, kochCurveLocation, SystemType::KOCH_CURVE);
 	}
 
 	return true;
@@ -397,16 +432,19 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 	if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
 	{
 		if (sub) sub->stopTurn();
+		cameraVelocity.x = 0;
 	}
 	else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
 	{
 		if (sub) sub->stopMove();
+		cameraVelocity.y = 0;
 	}
 
 	return true;
 }
 
-void Application::createPlant(const std::string& filename)
+Ogre::SceneNode* Application::createPlant(const std::string& filename, unsigned int numGenerations,
+	Ogre::Vector3 position, SystemType type)
 {
 	GrammarParser gp;
 	std::vector<std::string> grammarText;
@@ -426,28 +464,53 @@ void Application::createPlant(const std::string& filename)
 		gp.parseGrammar(grammarText, grammarRules);
 
 		ProgramNode grammar = *(ProgramNode*)grammarRules.tokenNode;
-
+		
 		// print grammar
 		grammar.accept(new StandardOutputVisitor());
 
-		// Add two symbols to start with and evolve 3 generations
-		std::cout << std::endl << "*1st Generation*****************************" << std::endl << std::endl;
-		IdentifierNode* idNode = new IdentifierNode("s");
-		IdentifierNode* idNode2 = new IdentifierNode("A23a");
-		std::vector<const Node*> symbols;
-		symbols.push_back(idNode);
-		symbols.push_back(idNode2);
-		GrammarGenerator::generate(grammar, symbols);
-		GrammarGenerator::printSymbols(symbols);
+		// Add start symbol
+		IdentifierNode* idNode = new IdentifierNode("F");
+		std::vector<Node*> symbols;
+		std::string name;
+		Ogre::Real angle;
+		switch (type)
+		{
+		case PYTHAGORAS_TREE:
+			idNode = new IdentifierNode("A");
+			name = "PYTHAGORAS TREE";
+			angle = Ogre::Math::PI / 4;
+			break;
+		case KOCH_CURVE:
+			idNode = new IdentifierNode("F");
+			name = "KOCH CURVE";
+			angle = Ogre::Math::PI / 2;
+			break;
+		default:
+			idNode = 0;
+			break;
+		}
+		if (idNode) symbols.push_back(idNode);
 
-		std::cout << std::endl << "*2nd Generation*****************************" << std::endl << std::endl;
-		GrammarGenerator::generate(grammar, symbols);
-		GrammarGenerator::printSymbols(symbols);
+		// Renderer visitor - will create our entities according to the grammar nodes it visits
+		Ogre::SceneNode* sceneNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+		RendererVisitor rendererVis(mSceneMgr, sceneNode, position, name, angle);
 
-		std::cout << std::endl << "*3rd Generation*****************************" << std::endl << std::endl;
-		GrammarGenerator::generate(grammar, symbols);
-		GrammarGenerator::printSymbols(symbols);
+		// Evolve the generations
+		for (unsigned int i = 0; i < numGenerations; i++)
+		{
+			GrammarGenerator::generate(grammar, symbols);
+			GrammarGenerator::printSymbols(symbols);
+		}
+
+		// Semantic processing of resulting parse tree, adding entities to ogre
+		for (std::vector<Node*>::iterator it = symbols.begin(); it != symbols.end(); it++)
+			(*it)->accept(&rendererVis);
+
+		return sceneNode;
 	}
 	else
+	{
 		std::cout << "Error: unable to open file: " << filename << std::endl;
+		return 0;
+	}
 }

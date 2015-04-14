@@ -18,13 +18,13 @@ namespace GeneratorNodes
 		std::cout << tokenString;
 	}
 
-	void MinusNode::accept(RendererVisitor* rv) const
+	void MinusNode::accept(StandardOutputVisitor* rv)
 	{
-		
+		rv->visit(this);
 	}
 
-	void MinusNode::accept(StandardOutputVisitor* stdov) const
+	void MinusNode::accept(RendererVisitor* rv)
 	{
-		std::cout << tokenString;
+		rv->visit(this);
 	}
 }

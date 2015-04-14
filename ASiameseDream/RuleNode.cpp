@@ -4,7 +4,7 @@
 
 namespace GeneratorNodes
 {
-	RuleNode::RuleNode(const Node* antecedent, const Node* consequent) : RULE_STRING(":=")
+	RuleNode::RuleNode(Node* antecedent, Node* consequent) : RULE_STRING(":=")
 	{
 		this->antecedent = antecedent;
 		this->consequent = consequent;
@@ -16,12 +16,12 @@ namespace GeneratorNodes
 		delete consequent;
 	}
 
-	const Node* RuleNode::getConsequent() const
+	Node* RuleNode::getConsequent() const
 	{
 		return consequent;
 	}
 
-	const Node* RuleNode::getAntecedent() const
+	Node* RuleNode::getAntecedent() const
 	{
 		return antecedent;
 	}
@@ -33,6 +33,11 @@ namespace GeneratorNodes
 		return oss.str();
 	}
 
+	std::string RuleNode::getRuleString() const
+	{
+		return RULE_STRING;
+	}
+
 	void RuleNode::print() const
 	{
 		antecedent->print();
@@ -40,15 +45,13 @@ namespace GeneratorNodes
 		consequent->print();
 	}
 
-	void RuleNode::accept(RendererVisitor* rv) const
+	void RuleNode::accept(StandardOutputVisitor* rv)
 	{
-		
+		rv->visit(this);
 	}
 
-	void RuleNode::accept(StandardOutputVisitor* stdov) const
+	void RuleNode::accept(RendererVisitor* rv)
 	{
-		antecedent->accept(stdov);
-		std::cout << " " << RULE_STRING << " ";
-		consequent->accept(stdov);
+		rv->visit(this);
 	}
 }

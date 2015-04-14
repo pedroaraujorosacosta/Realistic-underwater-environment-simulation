@@ -18,13 +18,13 @@ namespace GeneratorNodes
 		std::cout << name;
 	}
 
-	void IdentifierNode::accept(RendererVisitor* rv) const
+	void IdentifierNode::accept(StandardOutputVisitor* rv)
 	{
-		
+		rv->visit(this);
 	}
-
-	void IdentifierNode::accept(StandardOutputVisitor* stdov) const
+	
+	void IdentifierNode::accept(RendererVisitor* rv)
 	{
-		std::cout << name;
+		rv->visit(this);
 	}
 }

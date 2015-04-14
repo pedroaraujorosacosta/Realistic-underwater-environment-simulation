@@ -18,6 +18,14 @@ private:
 
 	// Keep our objects here
 	Submarine* sub;
+	Ogre::Vector2 cameraVelocity; // TODO: remove this when project is integrated
+	Ogre::SceneNode* pythagorasTree;
+	Ogre::Vector3	 pythagorasLocation;
+	Ogre::SceneNode* kochCurve;
+	Ogre::Vector3	 kochCurveLocation;
+	enum SystemType {PYTHAGORAS_TREE, KOCH_CURVE};
+	
+	Ogre::int32		 numGenerations;
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);
@@ -32,7 +40,8 @@ protected:
 	virtual void destroyScene(void);
 	virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);
 
-	void createPlant(const std::string& filename);
+	Ogre::SceneNode* createPlant(const std::string& filename, unsigned int numGenerations, 
+		Ogre::Vector3 position, SystemType type);
 
 	// IO Listeners
 	virtual bool mouseMoved(const OIS::MouseEvent& evt);

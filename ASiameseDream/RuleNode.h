@@ -9,20 +9,21 @@ namespace GeneratorNodes
 	class RuleNode : public Node
 	{
 		const std::string RULE_STRING;
-		const Node* antecedent;
-		const Node* consequent;
+		Node* antecedent;
+		Node* consequent;
 	public:
-		RuleNode(const Node* antecedent, const Node* consequent);
+		RuleNode(Node* antecedent, Node* consequent);
 		~RuleNode();
 
-		const Node* getConsequent() const;
-		const Node* getAntecedent() const;
+		Node* getConsequent() const;
+		Node* getAntecedent() const;
+		std::string getRuleString() const;
 		std::string getName() const;
 
 		virtual void print() const;
 
-		virtual void accept(RendererVisitor* rv) const;
-		virtual void accept(StandardOutputVisitor* stdo) const;
+		virtual void accept(StandardOutputVisitor* rv);
+		virtual void accept(RendererVisitor* rv);
 	};
 }
 #endif

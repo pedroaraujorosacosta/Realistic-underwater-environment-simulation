@@ -50,17 +50,13 @@ namespace GeneratorNodes
 		}
 	}
 
-	void TokenSequenceNode::accept(RendererVisitor* rv) const
+	void TokenSequenceNode::accept(StandardOutputVisitor* rv)
 	{
-		
+		rv->visit(this);
 	}
 
-	void TokenSequenceNode::accept(StandardOutputVisitor* stdov) const
+	void TokenSequenceNode::accept(RendererVisitor* rv)
 	{
-		for (std::vector<Node*>::const_iterator it = sequence.begin(); it != sequence.end(); it++)
-		{
-			(*it)->accept(stdov);
-			std::cout << " ";
-		}
+		rv->visit(this);
 	}
 }
