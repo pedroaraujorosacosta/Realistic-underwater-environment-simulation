@@ -139,12 +139,40 @@ void Application::createScene(void)
 	/*sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
 	sub->attachCamera(mCamera);*/
 
-	numGenerations = 3;
-	pythagorasLocation = Ogre::Vector3(1683, 49.7f, 2115);
-	pythagorasTree = createPlant("gram1.txt", numGenerations, pythagorasLocation, SystemType::PYTHAGORAS_TREE);
+	// create the plants
+	plants[PYTHAGORAS_TREE].numGenerations = 3;
+	plants[PYTHAGORAS_TREE].plantLocation = Ogre::Vector3(1683, 49.7f, 2115);
+	plants[PYTHAGORAS_TREE].plantNode = createPlant("gram1.txt", plants[PYTHAGORAS_TREE].numGenerations,
+		plants[PYTHAGORAS_TREE].plantLocation, PYTHAGORAS_TREE);
 
-	kochCurveLocation = Ogre::Vector3(1684, 49.7f, 2113);
-	kochCurve = createPlant("gram2.txt", numGenerations, kochCurveLocation, SystemType::KOCH_CURVE);
+	plants[KOCH_CURVE].numGenerations = 3;
+	plants[KOCH_CURVE].plantLocation = Ogre::Vector3(1684, 49.7f, 2113);
+	plants[KOCH_CURVE].plantNode = createPlant("gram2.txt", plants[KOCH_CURVE].numGenerations,
+		plants[KOCH_CURVE].plantLocation, KOCH_CURVE);
+
+	plants[SIERPINSKY_TRI].numGenerations = 3;
+	plants[SIERPINSKY_TRI].plantLocation = Ogre::Vector3(1681, 49.7f, 2114);
+	plants[SIERPINSKY_TRI].plantNode = createPlant("gram3.txt", plants[SIERPINSKY_TRI].numGenerations,
+		plants[SIERPINSKY_TRI].plantLocation, SIERPINSKY_TRI);
+
+	// create material for the selector cube
+	selectMat = Ogre::MaterialManager::getSingleton().create(Ogre::String("selectMat").c_str(),
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+	selectMat->setAmbient(1.0f, 0.0f, 0.0f);
+	selectMat->setDiffuse(1.0f, 0.0f, 0.0f, 1.0f);
+	selectMat->setSpecular(0.2f, 0.0f, 0.0f, 1.0f);
+
+	// create the selector cube mesh & set its material
+	selectorCube = mSceneMgr->createEntity("cube.mesh");
+	selectorCube->setMaterial(selectMat);
+
+	// create the selector cube node & attach its mesh
+	selection = PYTHAGORAS_TREE;
+	//cubeNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(1683, 49.7f, 2115));
+	cubeNode = plants[PYTHAGORAS_TREE].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
+	cubeNode->attachObject(selectorCube);
+	cubeNode->setScale(0.2f, 0.06f, 0.1f);
 
 	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
 
@@ -409,19 +437,62 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_ADD)
 	{
-		numGenerations++;
-		mSceneMgr->destroySceneNode(pythagorasTree);
-		mSceneMgr->destroySceneNode(kochCurve);
-		pythagorasTree = createPlant("gram1.txt", numGenerations, pythagorasLocation, SystemType::PYTHAGORAS_TREE);
-		kochCurve = createPlant("gram2.txt", numGenerations, kochCurveLocation, SystemType::KOCH_CURVE);
+		cubeNode->detachAllObjects();
+		mSceneMgr->destroySceneNode(cubeNode);
+		plants[selection].numGenerations++;
+		mSceneMgr->destroySceneNode(plants[PYTHAGORAS_TREE].plantNode);
+		mSceneMgr->destroySceneNode(plants[KOCH_CURVE].plantNode);
+		mSceneMgr->destroySceneNode(plants[SIERPINSKY_TRI].plantNode);
+		plants[PYTHAGORAS_TREE].plantNode = createPlant("gram1.txt", plants[PYTHAGORAS_TREE].numGenerations,
+			plants[PYTHAGORAS_TREE].plantLocation, PYTHAGORAS_TREE);
+		plants[KOCH_CURVE].plantNode = createPlant("gram2.txt", plants[KOCH_CURVE].numGenerations,
+			plants[KOCH_CURVE].plantLocation, KOCH_CURVE);
+		plants[SIERPINSKY_TRI].plantNode = createPlant("gram3.txt", plants[SIERPINSKY_TRI].numGenerations,
+			plants[SIERPINSKY_TRI].plantLocation, SIERPINSKY_TRI);
+		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
+		cubeNode->attachObject(selectorCube);
+		cubeNode->setScale(0.2f, 0.06f, 0.1f);
 	}
 	else if (arg.key == OIS::KC_SUBTRACT)
 	{
-		numGenerations--;
-		mSceneMgr->destroySceneNode(pythagorasTree);
-		mSceneMgr->destroySceneNode(kochCurve);
-		pythagorasTree = createPlant("gram1.txt", numGenerations, pythagorasLocation, SystemType::PYTHAGORAS_TREE);
-		kochCurve = createPlant("gram2.txt", numGenerations, kochCurveLocation, SystemType::KOCH_CURVE);
+		cubeNode->detachAllObjects();
+		mSceneMgr->destroySceneNode(cubeNode);
+		if (plants[selection].numGenerations > 0) plants[selection].numGenerations--;
+		mSceneMgr->destroySceneNode(plants[PYTHAGORAS_TREE].plantNode);
+		mSceneMgr->destroySceneNode(plants[KOCH_CURVE].plantNode);
+		mSceneMgr->destroySceneNode(plants[SIERPINSKY_TRI].plantNode);
+		plants[PYTHAGORAS_TREE].plantNode = createPlant("gram1.txt", plants[PYTHAGORAS_TREE].numGenerations,
+			plants[PYTHAGORAS_TREE].plantLocation, PYTHAGORAS_TREE);
+		plants[KOCH_CURVE].plantNode = createPlant("gram2.txt", plants[KOCH_CURVE].numGenerations,
+			plants[KOCH_CURVE].plantLocation, KOCH_CURVE);
+		plants[SIERPINSKY_TRI].plantNode = createPlant("gram3.txt", plants[SIERPINSKY_TRI].numGenerations,
+			plants[SIERPINSKY_TRI].plantLocation, SIERPINSKY_TRI);
+		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
+		cubeNode->attachObject(selectorCube);
+		cubeNode->setScale(0.2f, 0.06f, 0.1f);
+	}
+	else if (arg.key == OIS::KC_LEFT)
+	{
+		selection = ++selection % 3;
+
+		cubeNode->detachAllObjects();
+
+		mSceneMgr->destroySceneNode(cubeNode);
+		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
+		cubeNode->attachObject(selectorCube);
+		cubeNode->setScale(0.2f, 0.06f, 0.1f);
+	}
+	else if (arg.key == OIS::KC_RIGHT)
+	{
+		if (--selection < 0)
+			selection += 3;
+
+		cubeNode->detachAllObjects();
+
+		mSceneMgr->destroySceneNode(cubeNode);
+		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
+		cubeNode->attachObject(selectorCube);
+		cubeNode->setScale(0.2f, 0.06f, 0.1f);
 	}
 
 	return true;
@@ -484,6 +555,11 @@ Ogre::SceneNode* Application::createPlant(const std::string& filename, unsigned 
 			idNode = new IdentifierNode("F");
 			name = "KOCH CURVE";
 			angle = Ogre::Math::PI / 2;
+			break;
+		case SIERPINSKY_TRI:
+			idNode = new IdentifierNode("A");
+			name = "SIERPINSKY TRIANGLE";
+			angle = Ogre::Math::PI / 3;
 			break;
 		default:
 			idNode = 0;

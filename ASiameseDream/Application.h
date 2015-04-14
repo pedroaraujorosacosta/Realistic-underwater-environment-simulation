@@ -19,13 +19,17 @@ private:
 	// Keep our objects here
 	Submarine* sub;
 	Ogre::Vector2 cameraVelocity; // TODO: remove this when project is integrated
-	Ogre::SceneNode* pythagorasTree;
-	Ogre::Vector3	 pythagorasLocation;
-	Ogre::SceneNode* kochCurve;
-	Ogre::Vector3	 kochCurveLocation;
-	enum SystemType {PYTHAGORAS_TREE, KOCH_CURVE};
-	
-	Ogre::int32		 numGenerations;
+	Ogre::MaterialPtr selectMat;
+	Ogre::SceneNode* cubeNode;
+	Ogre::Entity *selectorCube;
+	enum SystemType {PYTHAGORAS_TREE, KOCH_CURVE, SIERPINSKY_TRI};
+	struct Plant_t
+	{
+		Ogre::SceneNode* plantNode;
+		Ogre::Vector3	 plantLocation;
+		Ogre::int32		 numGenerations;
+	} plants[3];
+	Ogre::int32		 selection;
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);

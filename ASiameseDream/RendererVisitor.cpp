@@ -45,12 +45,12 @@ void RendererVisitor::visit(IdentifierNode* node)
 		barrel = sceneMgr->createEntity("Barrel.mesh");
 		barrel->setMaterial(mat);
 
-		sceneNode = sceneNode->createChildSceneNode(Ogre::Vector3(0.0f, 6.5f, 1.0f));
+		sceneNode = sceneNode->createChildSceneNode(Ogre::Vector3(0.0f, 6.5f, 0.0f));
 		sceneNode->attachObject(barrel);
 	}
 	else if (node->getName() == "B")
 	{
-		// line segment
+		// line segment with length A * 2
 		barrel = sceneMgr->createEntity("Barrel.mesh");
 		barrel->setMaterial(mat);
 		barrel2 = sceneMgr->createEntity("Barrel.mesh");
@@ -62,6 +62,15 @@ void RendererVisitor::visit(IdentifierNode* node)
 	}
 	else if (node->getName() == "F")
 	{
+		barrel = sceneMgr->createEntity("Barrel.mesh");
+		barrel->setMaterial(mat);
+
+		sceneNode = sceneNode->createChildSceneNode(Ogre::Vector3(0.0f, 6.5f, 0.0f));
+		sceneNode->attachObject(barrel);
+	}
+	else if (node->getName() == "C")
+	{
+		// line segment as long as A. But it's rule might mean different behaviour
 		barrel = sceneMgr->createEntity("Barrel.mesh");
 		barrel->setMaterial(mat);
 
