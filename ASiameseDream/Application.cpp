@@ -152,6 +152,14 @@ void Application::createScene(void)
 	plants[SIERPINSKY_TRI].plantLocation = Ogre::Vector3(1681, 49.7f, 2114);
 	createPlant("gram3.txt", plants[SIERPINSKY_TRI], SIERPINSKY_TRI);
 
+	plants[DRAGON_CURVE].numGenerations = 3;
+	plants[DRAGON_CURVE].plantLocation = Ogre::Vector3(1682, 49.7f, 2113);
+	createPlant("gram4.txt", plants[DRAGON_CURVE], DRAGON_CURVE);
+
+	plants[FRACTAL_PLANT].numGenerations = 3;
+	plants[FRACTAL_PLANT].plantLocation = Ogre::Vector3(1685, 49.7f, 2114);
+	createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
+
 	// create material for the selector cube
 	selectMat = Ogre::MaterialManager::getSingleton().create(Ogre::String("selectMat").c_str(),
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
@@ -440,9 +448,13 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 		mSceneMgr->destroySceneNode(plants[PYTHAGORAS_TREE].plantNode);
 		mSceneMgr->destroySceneNode(plants[KOCH_CURVE].plantNode);
 		mSceneMgr->destroySceneNode(plants[SIERPINSKY_TRI].plantNode);
+		mSceneMgr->destroySceneNode(plants[DRAGON_CURVE].plantNode);
+		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
 		createPlant("gram1.txt", plants[PYTHAGORAS_TREE], PYTHAGORAS_TREE);
 		createPlant("gram2.txt", plants[KOCH_CURVE], KOCH_CURVE);
 		createPlant("gram3.txt", plants[SIERPINSKY_TRI], SIERPINSKY_TRI);
+		createPlant("gram4.txt", plants[DRAGON_CURVE], DRAGON_CURVE);
+		createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
 		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 		cubeNode->attachObject(selectorCube);
 		cubeNode->setScale(0.2f, 0.06f, 0.1f);
@@ -455,16 +467,20 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 		mSceneMgr->destroySceneNode(plants[PYTHAGORAS_TREE].plantNode);
 		mSceneMgr->destroySceneNode(plants[KOCH_CURVE].plantNode);
 		mSceneMgr->destroySceneNode(plants[SIERPINSKY_TRI].plantNode);
+		mSceneMgr->destroySceneNode(plants[DRAGON_CURVE].plantNode);
+		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
 		createPlant("gram1.txt", plants[PYTHAGORAS_TREE], PYTHAGORAS_TREE);
 		createPlant("gram2.txt", plants[KOCH_CURVE], KOCH_CURVE);
 		createPlant("gram3.txt", plants[SIERPINSKY_TRI], SIERPINSKY_TRI);
+		createPlant("gram4.txt", plants[DRAGON_CURVE], DRAGON_CURVE);
+		createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
 		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 		cubeNode->attachObject(selectorCube);
 		cubeNode->setScale(0.2f, 0.06f, 0.1f);
 	}
 	else if (arg.key == OIS::KC_LEFT)
 	{
-		selection = ++selection % 3;
+		selection = ++selection % 5;
 
 		cubeNode->detachAllObjects();
 
@@ -476,7 +492,7 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	else if (arg.key == OIS::KC_RIGHT)
 	{
 		if (--selection < 0)
-			selection += 3;
+			selection += 5;
 
 		cubeNode->detachAllObjects();
 
@@ -531,6 +547,7 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 
 		// Add start symbol
 		IdentifierNode* idNode = new IdentifierNode("F");
+		IdentifierNode* idNode2;
 		std::vector<Node*> symbols;
 		std::string name;
 		Ogre::Real angle;
@@ -538,31 +555,47 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 		{
 		case PYTHAGORAS_TREE:
 			idNode = new IdentifierNode("A");
+			symbols.push_back(idNode);
 			name = "PYTHAGORAS TREE";
 			angle = Ogre::Math::PI / 4;
 			break;
 		case KOCH_CURVE:
 			idNode = new IdentifierNode("F");
+			symbols.push_back(idNode);
 			name = "KOCH CURVE";
 			angle = Ogre::Math::PI / 2;
 			break;
 		case SIERPINSKY_TRI:
 			idNode = new IdentifierNode("A");
+			symbols.push_back(idNode);
 			name = "SIERPINSKY TRIANGLE";
 			angle = Ogre::Math::PI / 3;
+			break;
+		case DRAGON_CURVE:
+			idNode = new IdentifierNode("F");
+			idNode2 = new IdentifierNode("X");
+			symbols.push_back(idNode);
+			symbols.push_back(idNode2);
+			name = "DRAGON CURVE";
+			angle = Ogre::Math::PI / 2;
+			break;
+		case FRACTAL_PLANT:
+			idNode = new IdentifierNode("X");
+			symbols.push_back(idNode);
+			name = "FRACTAL PLANT";
+			angle = Ogre::Math::PI / 6;
 			break;
 		default:
 			idNode = 0;
 			break;
 		}
-		if (idNode) symbols.push_back(idNode);
 
 		// Renderer visitor - will create our entities according to the grammar nodes it visits
 		plant.plantNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, name, angle);
 
 		// Evolve the generations
-		for (unsigned int i = 0; i < plant.numGenerations; i++)
+		for (Ogre::int32 i = 0; i < plant.numGenerations; i++)
 		{
 			GrammarGenerator::generate(grammar, symbols);
 			GrammarGenerator::printSymbols(symbols);

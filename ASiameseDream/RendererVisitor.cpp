@@ -83,7 +83,7 @@ void RendererVisitor::visit(LeftBracketNode* node)
 {
 	sceneNodes.push(sceneNode);
 	sceneNode = sceneNode->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, 0.0f));
-	sceneNode->rotate(Ogre::Quaternion(Ogre::Radian(angle), Ogre::Vector3(0.0f, 0.0f, 1.0f)));
+	//sceneNode->rotate(Ogre::Quaternion(Ogre::Radian(angle), Ogre::Vector3(0.0f, 0.0f, 1.0f))); /// ***************
 }
 
 void RendererVisitor::visit(RightBracketNode* node)
@@ -91,7 +91,7 @@ void RendererVisitor::visit(RightBracketNode* node)
 	sceneNode = sceneNodes.top();
 	sceneNodes.pop();
 	sceneNode = sceneNode->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, 0.0f));
-	sceneNode->rotate(Ogre::Quaternion(Ogre::Radian(-angle), Ogre::Vector3(0.0f, 0.0f, 1.0f)));
+	//sceneNode->rotate(Ogre::Quaternion(Ogre::Radian(-angle), Ogre::Vector3(0.0f, 0.0f, 1.0f))); /// ***************
 }
 
 void RendererVisitor::visit(PlusNode* node)

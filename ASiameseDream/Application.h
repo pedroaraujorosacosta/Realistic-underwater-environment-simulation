@@ -22,13 +22,13 @@ private:
 	Ogre::MaterialPtr selectMat;
 	Ogre::SceneNode* cubeNode;
 	Ogre::Entity *selectorCube;
-	enum SystemType {PYTHAGORAS_TREE, KOCH_CURVE, SIERPINSKY_TRI};
+	enum SystemType {PYTHAGORAS_TREE, KOCH_CURVE, SIERPINSKY_TRI, DRAGON_CURVE, FRACTAL_PLANT};
 	struct Plant_t
 	{
 		Ogre::SceneNode* plantNode;
 		Ogre::Vector3	 plantLocation;
 		Ogre::int32		 numGenerations;
-	} plants[3];
+	} plants[5];
 	Ogre::int32		 selection;
 
 	void defineTerrain(long x, long y);
