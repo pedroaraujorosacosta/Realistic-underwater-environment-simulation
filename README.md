@@ -1,5 +1,9 @@
 # thesiamesedream
 
+For l-systems:
+==============
+Put the fonts.zip into the appropriate folder and include it in the resources file.
+
 Configuracao
 ============
 Vou colocando aqui coisas 'a medida que reparo que estavam em falta na configuracao.

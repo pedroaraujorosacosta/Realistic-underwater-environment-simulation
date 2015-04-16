@@ -44,14 +44,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(OGRE_HOME)\include;$(OGRE_HOME)\include\OIS;$(OGRE_HOME)\include\OGRE;$(OGRE_HOME)\include\OGRE\Overlay;$(OGRE_SAMPLES)\Common\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OGRE_HOME)\include;$(OGRE_HOME)\include\OIS;$(OGRE_HOME)\include\OGRE;$(OGRE_HOME)\include\OGRE\Overlay;$(OGRE_SAMPLES)\Common\include</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <AdditionalOptions>/Zm198 %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OgreMain_d.lib;OIS_d.lib;OgreOverlay_d.lib;OgreTerrain_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -66,7 +66,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(OGRE_HOME)\include;$(OGRE_HOME)\include\OIS;$(OGRE_HOME)\include\OGRE;$(OGRE_HOME)\include\OGRE\Overlay;$(OGRE_SAMPLES)\Common\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(OGRE_HOME)\include;$(OGRE_HOME)\include\OIS;$(OGRE_HOME)\include\OGRE;$(OGRE_HOME)\include\OGRE\Overlay;$(OGRE_SAMPLES)\Common\include</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <AdditionalOptions>/Zm198 %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -75,7 +75,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OGRE_HOME)\lib\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OgreMain.lib;OIS.lib;OgreOverlay.lib;OgreTerrain.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -86,17 +86,47 @@
   <ItemGroup>
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="GrammarGenerator.cpp" />
+    <ClCompile Include="GrammarParser.cpp" />
+    <ClCompile Include="IdentifierNode.cpp" />
+    <ClCompile Include="LeftBracketNode.cpp" />
+    <ClCompile Include="MinusNode.cpp" />
+    <ClCompile Include="MovableText.cpp" />
+    <ClCompile Include="PlusNode.cpp" />
+    <ClCompile Include="ProgramNode.cpp" />
+    <ClCompile Include="RendererVisitor.cpp" />
+    <ClCompile Include="RightBracketNode.cpp" />
+    <ClCompile Include="RuleNode.cpp" />
+    <ClCompile Include="StandardOutputVisitor.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Submarine.cpp" />
+    <ClCompile Include="TokenSequenceNode.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AllNodes.h" />
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="GrammarGenerator.h" />
+    <ClInclude Include="GrammarParser.h" />
+    <ClInclude Include="IdentifierNode.h" />
+    <ClInclude Include="LeftBracketNode.h" />
+    <ClInclude Include="MinusNode.h" />
+    <ClInclude Include="MovableText.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="NodeVisitor.h" />
+    <ClInclude Include="PlusNode.h" />
+    <ClInclude Include="ProgramNode.h" />
+    <ClInclude Include="RendererVisitor.h" />
+    <ClInclude Include="RightBracketNode.h" />
+    <ClInclude Include="RuleNode.h" />
+    <ClInclude Include="StandardOutputVisitor.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringTokenizer.h" />
     <ClInclude Include="Submarine.h" />
+    <ClInclude Include="TokenSequenceNode.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
