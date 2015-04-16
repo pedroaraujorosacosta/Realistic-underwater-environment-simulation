@@ -6,6 +6,8 @@
 #include <Terrain/OgreTerrainGroup.h>
 #include "BaseApplication.h"
 
+#define MAX_PLANTS 5
+
 class Submarine;
 
 class Application : public BaseApplication
@@ -19,17 +21,19 @@ private:
 	// Keep our objects here
 	Submarine* sub;
 	Ogre::Vector2 cameraVelocity; // TODO: remove this when project is integrated
-	Ogre::MaterialPtr selectMat;
-	Ogre::SceneNode* cubeNode;
-	Ogre::Entity *selectorCube;
+	Ogre::MaterialPtr selectMat;  // TODO: remove this when project is integrated
+	Ogre::SceneNode* cubeNode;    // TODO: remove this when project is integrated
+	Ogre::Entity *selectorCube;   // TODO: remove this when project is integrated
+	Ogre::Real	  cubeVelocity;   // TODO: remove this when project is integrated
+	Ogre::int32		 selection;   // TODO: remove this when project is integrated
+	Ogre::int32		oldSelection; // TODO: remove this when project is integrated
 	enum SystemType {PYTHAGORAS_TREE, KOCH_CURVE, SIERPINSKY_TRI, DRAGON_CURVE, FRACTAL_PLANT};
 	struct Plant_t
 	{
 		Ogre::SceneNode* plantNode;
 		Ogre::Vector3	 plantLocation;
 		Ogre::int32		 numGenerations;
-	} plants[5];
-	Ogre::int32		 selection;
+	} plants[MAX_PLANTS];
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);

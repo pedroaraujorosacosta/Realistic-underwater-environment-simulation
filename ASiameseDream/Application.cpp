@@ -173,7 +173,8 @@ void Application::createScene(void)
 	selectorCube->setMaterial(selectMat);
 
 	// create the selector cube node & attach its mesh
-	selection = PYTHAGORAS_TREE;
+	oldSelection = selection = PYTHAGORAS_TREE;
+	cubeVelocity = 10.0f;
 	//cubeNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(1683, 49.7f, 2115));
 	cubeNode = plants[PYTHAGORAS_TREE].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 	cubeNode->attachObject(selectorCube);
@@ -273,6 +274,21 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	Ogre::Vector3 newPosition = mCamera->getPosition() + directionX * cameraVelocity.x * evt.timeSinceLastFrame + 
 		directionY * cameraVelocity.y * evt.timeSinceLastFrame;
 	mCamera->setPosition(newPosition);
+
+	// update selector cube velocity & direction - TODO: remove this when project is integrated
+	if (selection != oldSelection)
+	{
+		Ogre::Vector3 vectorToSelected = plants[selection].plantLocation - cubeNode->_getDerivedPosition() -
+			Ogre::Vector3(0.0f, 0.12f, 0.0f);
+		Ogre::Real distanceToSelected = vectorToSelected.length();
+		Ogre::Vector3 cubeDirection = vectorToSelected /
+			(plants[selection].plantLocation - plants[oldSelection].plantLocation).length();
+		if (distanceToSelected > 0.001f)
+		{
+			Ogre::Vector3 newCubePosition = cubeNode->_getDerivedPosition() + cubeVelocity * cubeDirection * evt.timeSinceLastFrame;
+			cubeNode->_setDerivedPosition(newCubePosition);
+		}
+	}
 
 	return ret;
 }
@@ -480,26 +496,28 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_LEFT)
 	{
-		selection = ++selection % 5;
+		oldSelection = selection;
+		selection = ++selection % MAX_PLANTS;
 
-		cubeNode->detachAllObjects();
+		/*cubeNode->detachAllObjects();
 
 		mSceneMgr->destroySceneNode(cubeNode);
 		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 		cubeNode->attachObject(selectorCube);
-		cubeNode->setScale(0.2f, 0.06f, 0.1f);
+		cubeNode->setScale(0.2f, 0.06f, 0.1f);*/
 	}
 	else if (arg.key == OIS::KC_RIGHT)
 	{
+		oldSelection = selection;
 		if (--selection < 0)
-			selection += 5;
+			selection += MAX_PLANTS;
 
-		cubeNode->detachAllObjects();
+		/*cubeNode->detachAllObjects();
 
 		mSceneMgr->destroySceneNode(cubeNode);
 		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
 		cubeNode->attachObject(selectorCube);
-		cubeNode->setScale(0.2f, 0.06f, 0.1f);
+		cubeNode->setScale(0.2f, 0.06f, 0.1f);*/
 	}
 
 	return true;
@@ -527,6 +545,7 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 	std::vector<std::string> grammarText;
 	std::string line;
 	std::ifstream ifStream;
+	bool isPythagoras = false;
 
 	ifStream.open(filename);
 	if (ifStream.is_open())
@@ -558,6 +577,7 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 			symbols.push_back(idNode);
 			name = "PYTHAGORAS TREE";
 			angle = Ogre::Math::PI / 4;
+			isPythagoras = true;
 			break;
 		case KOCH_CURVE:
 			idNode = new IdentifierNode("F");
@@ -592,7 +612,7 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 
 		// Renderer visitor - will create our entities according to the grammar nodes it visits
 		plant.plantNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, name, angle);
+		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, name, angle, isPythagoras);
 
 		// Evolve the generations
 		for (Ogre::int32 i = 0; i < plant.numGenerations; i++)

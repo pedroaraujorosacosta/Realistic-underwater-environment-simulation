@@ -25,11 +25,13 @@ class RendererVisitor : public NodeVisitor
 	Ogre::Real						angle;
 	Ogre::MaterialPtr				mat;
 	std::stack<Ogre::SceneNode*>	sceneNodes;
+	bool							isPythagoras;
 
 public:
-	RendererVisitor(Ogre::SceneManager* sceneMgr, Ogre::SceneNode* sceneNode, std::string name, Ogre::Real angle);
+	RendererVisitor(Ogre::SceneManager* sceneMgr, Ogre::SceneNode* sceneNode, std::string name, Ogre::Real angle,
+		bool isPythagoras);
 	RendererVisitor(Ogre::SceneManager* sceneMgr, Ogre::SceneNode* sceneNode, const Ogre::Vector3& position,
-		std::string name, Ogre::Real angle);
+		std::string name, Ogre::Real angle, bool isPythagoras);
 
 	virtual void visit(GeneratorNodes::Node* node);
 	virtual void visit(GeneratorNodes::IdentifierNode* node);
