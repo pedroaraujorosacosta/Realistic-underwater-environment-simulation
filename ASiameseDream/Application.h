@@ -16,23 +16,25 @@ private:
 	Ogre::TerrainGlobalOptions* mTerrainGlobals;
 	Ogre::TerrainGroup* mTerrainGroup;
 	OgreBites::Label* mInfoLabel;
+	OgreBites::Slider* mDiffuseColorRSlider;
+	OgreBites::Slider* mDiffuseColorGSlider;
+	OgreBites::Slider* mDiffuseColorBSlider;
 	bool mTerrainsImported;
 
 	// Keep our objects here
-	Submarine* sub;
-	Ogre::Vector2 cameraVelocity; // TODO: remove this when project is integrated
-	Ogre::MaterialPtr selectMat;  // TODO: remove this when project is integrated
-	Ogre::SceneNode* cubeNode;    // TODO: remove this when project is integrated
-	Ogre::Entity *selectorCube;   // TODO: remove this when project is integrated
-	Ogre::Real	  cubeVelocity;   // TODO: remove this when project is integrated
-	Ogre::int32		 selection;   // TODO: remove this when project is integrated
-	Ogre::int32		oldSelection; // TODO: remove this when project is integrated
+	Submarine*		sub;
+	Ogre::Vector2	cameraVelocity; // TODO: remove this when project is integrated
+	Ogre::Real		selectVelocity; // TODO: remove this when project is integrated
+	Ogre::int32		selection;		// TODO: remove this when project is integrated
+	Ogre::int32		oldSelection;	// TODO: remove this when project is integrated
+	bool			isSelectMoving; // TODO: remove this when project is integrated
 	enum SystemType { FRACTAL_PLANT, PYTHAGORAS_TREE };
 	struct Plant_t
 	{
 		Ogre::SceneNode* plantNode;
 		Ogre::Vector3	 plantLocation;
 		Ogre::int32		 numGenerations;
+		Ogre::Real		 maxHeight;
 	} plants[MAX_PLANTS];
 
 	void defineTerrain(long x, long y);
@@ -42,6 +44,8 @@ public:
 	Application(void);
 	virtual ~Application(void);
 
+	// Sdk Tray listeners
+	virtual void sliderMoved(OgreBites::Slider* slider);
 protected:
 	virtual void createScene(void);
 	virtual void createFrameListener(void);

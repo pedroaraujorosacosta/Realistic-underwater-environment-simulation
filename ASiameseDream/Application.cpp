@@ -4,6 +4,7 @@
 // includes for my GrammarParser lib
 #include "GrammarParser.h"
 #include "GrammarGenerator.h"
+#include "GrammarCompactor.h"
 #include "ProgramNode.h"
 #include "StandardOutputVisitor.h"
 #include "RendererVisitor.h"
@@ -23,10 +24,7 @@ Application::~Application(void)
 //-------------------------------------------------------------------------------------
 void Application::destroyScene(void)
 {
-	/********* TERRAIN ***************************************************************/
-	/*OGRE_DELETE mTerrainGroup;
-	OGRE_DELETE mTerrainGlobals;
-	**********************************************************************************/
+
 }
 //-------------------------------------------------------------------------------------
 void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
@@ -133,31 +131,13 @@ void Application::createScene(void)
 	// create the plants
 	plants[FRACTAL_PLANT].numGenerations = 3;
 	plants[FRACTAL_PLANT].plantLocation = Ogre::Vector3(1683, 49.7f, 2115);
+	plants[FRACTAL_PLANT].maxHeight = 0.0f;
 	createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
-
-	plants[PYTHAGORAS_TREE].numGenerations = 3;
-	plants[PYTHAGORAS_TREE].plantLocation = Ogre::Vector3(1681, 49.7f, 2114);
-	createPlant("gram1.txt", plants[PYTHAGORAS_TREE], PYTHAGORAS_TREE);
-
-	// create material for the selector cube
-	selectMat = Ogre::MaterialManager::getSingleton().create(Ogre::String("selectMat").c_str(),
-		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-	selectMat->setAmbient(1.0f, 0.0f, 0.0f);
-	selectMat->setDiffuse(1.0f, 0.0f, 0.0f, 1.0f);
-	selectMat->setSpecular(0.2f, 0.0f, 0.0f, 1.0f);
-
-	// create the selector cube mesh & set its material
-	selectorCube = mSceneMgr->createEntity("cube.mesh");
-	selectorCube->setMaterial(selectMat);
 
 	// create the selector cube node & attach its mesh
 	oldSelection = selection = FRACTAL_PLANT;
-	cubeVelocity = 10.0f;
-	//cubeNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(1683, 49.7f, 2115));
-	cubeNode = plants[FRACTAL_PLANT].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
-	cubeNode->attachObject(selectorCube);
-	cubeNode->setScale(0.2f, 0.06f, 0.1f);
+	selectVelocity = 10.0f;
+	isSelectMoving = false;
 
 	// setup RTT
 	Ogre::TexturePtr rttTexture =
@@ -176,7 +156,7 @@ void Application::createScene(void)
 	renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
 	renderTexture->getViewport(0)->setOverlaysEnabled(false);
 
-	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
+	Ogre::Vector3 lightdir(0.0f, 0.0f, -1.0f);
 	lightdir.normalise();
 
 	Ogre::Light* light = mSceneMgr->createLight("tstLight");
@@ -201,6 +181,15 @@ void Application::createFrameListener(void)
 	mInfoLabel = mTrayMgr->createLabel(OgreBites::TL_TOP, "TInfo", "", 350);
 	mTrayMgr->removeWidgetFromTray(mInfoLabel);
 	mInfoLabel->hide();
+
+	mDiffuseColorRSlider = mTrayMgr->createLongSlider(OgreBites::TL_LEFT, "TSDiffuseR", "Diffuse Color R", 50,
+		60, 0, 255, 256);
+	mDiffuseColorGSlider = mTrayMgr->createLongSlider(OgreBites::TL_LEFT, "TSDiffuseG", "Diffuse Color G", 50,
+		60, 0, 255, 256);
+	mDiffuseColorBSlider = mTrayMgr->createLongSlider(OgreBites::TL_LEFT, "TSDiffuseB", "Diffuse Color B", 50,
+		60, 0, 255, 256);
+
+
 }
 //-------------------------------------------------------------------------------------
 bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
@@ -208,55 +197,36 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	bool ret = BaseApplication::frameRenderingQueued(evt);
 
 	mInfoLabel->setCaption("L-System to texture demo");
-	/********* TERRAIN ***************************************************************/
-	/*if (mTerrainGroup->isDerivedDataUpdateInProgress())
-	{
-		mTrayMgr->moveWidgetToTray(mInfoLabel, OgreBites::TL_TOP, 0);
-		mInfoLabel->show();
-		if (mTerrainsImported)
-		{
-			mInfoLabel->setCaption("Building terrain, please wait...");
-		}
-		else
-		{
-			mInfoLabel->setCaption("Updating textures, patience...");
-		}
-	}
-	else
-	{
-		mTrayMgr->removeWidgetFromTray(mInfoLabel);
-		mInfoLabel->hide();
-		if (mTerrainsImported)
-		{
-			mTerrainGroup->saveAllTerrains(true);
-			mTerrainsImported = false;
-		}
-	}
-	******************************************************************************/
 
 	if (sub) sub->update(evt.timeSinceLastFrame);
 
+	mTrayMgr->showCursor();
+	
+
 	// update camera position - TODO: remove this when project is integrated
-	Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
+	/*Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
 	Ogre::Vector3 directionY = - (mCamera->getOrientation() * Ogre::Vector3::UNIT_Z);
 	Ogre::Vector3 newPosition = mCamera->getPosition() + directionX * cameraVelocity.x * evt.timeSinceLastFrame + 
 		directionY * cameraVelocity.y * evt.timeSinceLastFrame;
-	mCamera->setPosition(newPosition);
+	mCamera->setPosition(newPosition);*/
 
-	// update selector cube velocity & direction - TODO: remove this when project is integrated
-	if (selection != oldSelection)
+	// update selector velocity & direction - TODO: remove this when project is integrated
+	/*if (selection != oldSelection && isSelectMoving)
 	{
-		Ogre::Vector3 vectorToSelected = plants[selection].plantLocation - cubeNode->_getDerivedPosition() -
-			Ogre::Vector3(0.0f, 0.12f, 0.0f);
+		Ogre::Vector3 vectorToSelected = plants[selection].plantLocation - mCamera->getPosition() +
+			Ogre::Vector3(0.0f, 0.3f, 1.0f);
 		Ogre::Real distanceToSelected = vectorToSelected.length();
-		Ogre::Vector3 cubeDirection = vectorToSelected /
+		Ogre::Vector3 selectDirection = vectorToSelected /
 			(plants[selection].plantLocation - plants[oldSelection].plantLocation).length();
 		if (distanceToSelected > 0.001f)
 		{
-			Ogre::Vector3 newCubePosition = cubeNode->_getDerivedPosition() + cubeVelocity * cubeDirection * evt.timeSinceLastFrame;
-			cubeNode->_setDerivedPosition(newCubePosition);
+			Ogre::Vector3 newSelectPosition = mCamera->getPosition() + selectVelocity * selectDirection *
+				evt.timeSinceLastFrame;
+			mCamera->setPosition(newSelectPosition);
 		}
-	}
+		else
+			isSelectMoving = false;
+	}*/
 
 	return ret;
 }
@@ -300,18 +270,24 @@ extern "C" {
 bool Application::mouseMoved(const OIS::MouseEvent& evt)
 {
 	//sub->addRotations(0.13f * evt.state.X.rel, 0.13f * evt.state.Y.rel, 0.0f);
-	mCamera->yaw(Ogre::Degree(-0.13f * evt.state.X.rel));
-	mCamera->pitch(Ogre::Degree(-0.13f * evt.state.Y.rel));
+	
+	/**CAMERA MOUSE MOVEMENT****************************************/
+	/*mCamera->yaw(Ogre::Degree(-0.13f * evt.state.X.rel));
+	mCamera->pitch(Ogre::Degree(-0.13f * evt.state.Y.rel));*/
+	/***************************************************************/
+	if (mTrayMgr->injectMouseMove(evt)) return true;
 	return true;
 }
 
 bool Application::mousePressed(const OIS::MouseEvent& evt, OIS::MouseButtonID id)
 {
+	if (mTrayMgr->injectMouseDown(evt, id)) return true;
 	return true;
 }
 
 bool Application::mouseReleased(const OIS::MouseEvent& evt, OIS::MouseButtonID id)
 {
+	if (mTrayMgr->injectMouseUp(evt, id)) return true;
 	return true;
 }
 //---------------------------------------------------------------------------
@@ -406,56 +382,50 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_A)
 	{
-		//if (sub) sub->turnRight(true);
+		isSelectMoving = false;
 		cameraVelocity.x = -1.0f;
 	}
 	else if (arg.key == OIS::KC_D)
 	{
-		//if (sub) sub->turnRight();
+		isSelectMoving = false;
 		cameraVelocity.x = 1.0f;
 	}
 	else if (arg.key == OIS::KC_W)
 	{
-		//if (sub) sub->moveFront();
+		isSelectMoving = false;
 		cameraVelocity.y = 1.0f;
 	}
 	else if (arg.key == OIS::KC_S)
 	{
-		//if (sub) sub->moveFront(true);
+		isSelectMoving = false;
 		cameraVelocity.y = -1.0f;
 	}
 	else if (arg.key == OIS::KC_ADD)
 	{
-		cubeNode->detachAllObjects();
-		mSceneMgr->destroySceneNode(cubeNode);
 		plants[selection].numGenerations++;
 		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
+		plants[FRACTAL_PLANT].maxHeight = 0.0f;
 		createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
-		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
-		cubeNode->attachObject(selectorCube);
-		cubeNode->setScale(0.2f, 0.06f, 0.1f);
 	}
 	else if (arg.key == OIS::KC_SUBTRACT)
 	{
-		cubeNode->detachAllObjects();
-		mSceneMgr->destroySceneNode(cubeNode);
 		if (plants[selection].numGenerations > 0) plants[selection].numGenerations--;
 		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
+		plants[FRACTAL_PLANT].maxHeight = 0.0f;
 		createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
-		cubeNode = plants[selection].plantNode->createChildSceneNode(Ogre::Vector3(0.0f, -12.0f, 0.0f));
-		cubeNode->attachObject(selectorCube);
-		cubeNode->setScale(0.2f, 0.06f, 0.1f);
 	}
 	else if (arg.key == OIS::KC_LEFT)
 	{
 		oldSelection = selection;
 		selection = ++selection % MAX_PLANTS;
+		isSelectMoving = true;
 	}
 	else if (arg.key == OIS::KC_RIGHT)
 	{
 		oldSelection = selection;
 		if (--selection < 0)
 			selection += MAX_PLANTS;
+		isSelectMoving = true;
 	}
 
 	return true;
@@ -476,6 +446,13 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 
 	return true;
 }
+//---------------------------------------------------------------------------
+
+// Sdk Tray listeners
+void Application::sliderMoved(OgreBites::Slider* slider)
+{
+	//slider->setValue(1.0f, false);
+}
 
 void Application::createPlant(const std::string& filename, Plant_t& plant, SystemType type)
 {
@@ -483,7 +460,6 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 	std::vector<std::string> grammarText;
 	std::string line;
 	std::ifstream ifStream;
-	bool isPythagoras = false;
 
 	ifStream.open(filename);
 	if (ifStream.is_open())
@@ -521,7 +497,6 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 			symbols.push_back(idNode);
 			name = "PYTHAGORAS TREE";
 			angle = Ogre::Math::PI / 4;
-			isPythagoras = true;
 			break;
 		default:
 			idNode = 0;
@@ -530,7 +505,7 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 
 		// Renderer visitor - will create our entities according to the grammar nodes it visits
 		plant.plantNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, name, angle, isPythagoras);
+		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, name, angle);
 
 		// Evolve the generations
 		for (Ogre::int32 i = 0; i < plant.numGenerations; i++)
@@ -539,9 +514,14 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 			GrammarGenerator::printSymbols(symbols);
 		}
 
+		GrammarCompactor::compact(symbols);
+		
 		// Semantic processing of resulting parse tree, adding entities to ogre
 		for (std::vector<Node*>::iterator it = symbols.begin(); it != symbols.end(); it++)
 			(*it)->accept(&rendererVis);
+
+		Ogre::Real h = abs(rendererVis.getMaxHeightReached() - 49.7f);
+		mCamera->setPosition(Ogre::Vector3(1683.0f, 49.7f + h / 2, 2115.0f + h / atan(1.0f)));
 	}
 	else
 	{

@@ -86,6 +86,8 @@
   <ItemGroup>
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="CompactorVisitor.cpp" />
+    <ClCompile Include="GrammarCompactor.cpp" />
     <ClCompile Include="GrammarGenerator.cpp" />
     <ClCompile Include="GrammarParser.cpp" />
     <ClCompile Include="IdentifierNode.cpp" />
@@ -109,6 +111,8 @@
     <ClInclude Include="AllNodes.h" />
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="Application.h" />
+    <ClInclude Include="CompactorVisitor.h" />
+    <ClInclude Include="GrammarCompactor.h" />
     <ClInclude Include="GrammarGenerator.h" />
     <ClInclude Include="GrammarParser.h" />
     <ClInclude Include="IdentifierNode.h" />
