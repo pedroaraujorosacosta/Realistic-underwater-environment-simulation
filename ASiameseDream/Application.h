@@ -51,6 +51,7 @@ private:
 	Ogre::Rectangle2D* plantQuad;
 	Ogre::RenderTexture* renderTexture;
 	Ogre::TexturePtr rttTexture;
+	Ogre::MaterialPtr renderMaterial;
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);
@@ -58,8 +59,6 @@ private:
 public:
 	Application(void);
 	virtual ~Application(void);
-
-	virtual void go(void);
 
 	// Sdk Tray listeners
 	virtual void sliderMoved(OgreBites::Slider* slider);

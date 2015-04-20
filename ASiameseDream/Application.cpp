@@ -27,7 +27,7 @@ Application::~Application(void)
 //-------------------------------------------------------------------------------------
 void Application::destroyScene(void)
 {
-	//mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
+	
 }
 //-------------------------------------------------------------------------------------
 void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
@@ -147,7 +147,17 @@ void Application::createScene(void)
 	renderTexture->getViewport(0)->setClearEveryFrame(true);
 	renderTexture->getViewport(0)->setBackgroundColour(Ogre::ColourValue::Black);
 	renderTexture->getViewport(0)->setOverlaysEnabled(false);
+	renderTexture->setAutoUpdated(false);
 
+	renderMaterial =
+		Ogre::MaterialManager::getSingleton().create(
+		"RttMat",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+	renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+	renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex");
+
+	// Setup lights
 	Ogre::Vector3 lightdir(0.0f, 0.0f, -1.0f);
 	lightdir.normalise();
 
@@ -162,15 +172,6 @@ void Application::createScene(void)
 	Ogre::ColourValue fadeColour(0.0f, 0.0f, 0.0f);
 	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
 
-	/*renderTexture->update();
-	renderTexture->writeContentsToFile("start.png");*/
-
-	// create the plants
-	plants[FRACTAL_PLANT].numGenerations = 3;
-	plants[FRACTAL_PLANT].plantLocation = Ogre::Vector3(1683, 49.7f, 2115);
-	plants[FRACTAL_PLANT].maxHeight = 0.0f;
-	createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
-
 	// create the selector cube node & attach its mesh
 	oldSelection = selection = FRACTAL_PLANT;
 	selectVelocity = 10.0f;
@@ -178,12 +179,18 @@ void Application::createScene(void)
 
 	// Create the quad where we render our plant
 	plantQuad = new Ogre::Rectangle2D(true);
-	plantQuad->setCorners(.5, 1.0, 1.0, .5);
+	plantQuad->setCorners(-1.0f, 1.0f, 1.0f, -1.0f);
 	plantQuad->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
 	Ogre::SceneNode* miniScreenNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	miniScreenNode->attachObject(plantQuad);
 
 	renderTexture->addListener(this);
+
+	// create the plants
+	plants[FRACTAL_PLANT].numGenerations = 3;
+	plants[FRACTAL_PLANT].plantLocation = Ogre::Vector3(1683, 49.7f, 2115);
+	plants[FRACTAL_PLANT].maxHeight = 0.0f;
+	createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
 }
 //-------------------------------------------------------------------------------------
 void Application::createFrameListener(void)
@@ -231,6 +238,7 @@ void Application::createFrameListener(void)
 	mTrayMgr->createLabel(OgreBites::TL_RIGHT, "TLNumGen", "Generations", 150.0f);
 	mNumGenerationsSlider = mTrayMgr->createLongSlider(OgreBites::TL_RIGHT, "TSNumGen", "", 50,
 		60, 0, 6, 7);
+	mNumGenerationsSlider->setValue(plants[FRACTAL_PLANT].numGenerations);
 
 	mTrayMgr->createSeparator(OgreBites::TL_RIGHT, "TSeparator4", 150.0f);
 
@@ -526,7 +534,6 @@ void Application::buttonHit(OgreBites::Button* bt)
 
 void Application::resetPlant()
 {
-	//mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
 	plants[FRACTAL_PLANT].maxHeight = 0.0f;
 	createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
 }
@@ -605,76 +612,13 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 
 		plantChanged = true;
 		renderToTexture();
+		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
 	}
 	else
 	{
 		std::cout << "Error: unable to open file: " << filename << std::endl;
 		plant.plantNode = 0;
 	}
-}
-
-void Application::go(void)
-{
-#ifdef _DEBUG
-#ifndef OGRE_STATIC_LIB
-	mResourcesCfg = m_ResourcePath + "resources_d.cfg";
-	mPluginsCfg = m_ResourcePath + "plugins_d.cfg";
-#else
-	mResourcesCfg = "resources_d.cfg";
-	mPluginsCfg = "plugins_d.cfg";
-#endif
-#else
-#ifndef OGRE_STATIC_LIB
-	mResourcesCfg = m_ResourcePath + "resources.cfg";
-	mPluginsCfg = m_ResourcePath + "plugins.cfg";
-#else
-	mResourcesCfg = "resources.cfg";
-	mPluginsCfg = "plugins.cfg";
-#endif
-#endif
-
-	if (!setup())
-		return;
-
-	//while (!mWindow->isClosed() && !mShutDown);
-	//mRoot->startRendering();
-
-	//assert(mActiveRenderer != 0);
-
-	//mActiveRenderer->_initRenderTargets();
-
-	// Clear event times
-	mRoot->clearEventTimes();
-
-	// Infinite loop, until broken out of by frame listeners
-	// or break out by calling queueEndRendering()
-	//mQueuedEnd = false;
-
-	mSceneMgr->addRenderQueueListener(this);
-	mRoot->renderOneFrame();
-
-	while (!mWindow->isClosed() && !mShutDown)
-	{
-		//Pump messages in all registered RenderWindow windows
-		Ogre::WindowEventUtilities::messagePump();
-
-		/*if (plantChanged)
-		{
-			mRoot->renderOneFrame();
-			plantChanged = false;
-		}*/
-		bool ret = mRoot->renderOneFrame();
-		if (plantChanged)
-		{
-			mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
-			plantChanged = false;
-		}
-		if (!ret)
-			break;
-	}
-
-	// Clean up
-	destroyScene();
 }
 
 void Application::renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation)
@@ -692,6 +636,16 @@ void Application::renderToTexture(const Ogre::String& filename)
 {
 	renderTexture->update();
 	renderTexture->writeContentsToFile(filename);
+
+	renderMaterial =
+		Ogre::MaterialManager::getSingleton().create(
+		"RttMat",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+	renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+	renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex");
+
+	plantQuad->setMaterial("RttMat");
 }
 
 void Application::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
