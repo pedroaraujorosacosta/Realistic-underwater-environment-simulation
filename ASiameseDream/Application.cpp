@@ -12,9 +12,11 @@
 
 using namespace GeneratorNodes;
 
+Ogre::String texName;
+
 //-------------------------------------------------------------------------------------
 Application::Application(void) : diffuseRed(0.0f), diffuseGreen(0.0f), diffuseBlue(0.0f), specularRed(0.0f),
-	specularGreen(0.0f), specularBlue(0.0f), INIT_ANGLE(Ogre::Math::PI / 6), plantChanged(false)
+	specularGreen(0.0f), specularBlue(0.0f), INIT_ANGLE(Ogre::Math::PI / 6), appState(PLANT_EDITOR)
 {
 	sub = 0;
 	angle = INIT_ANGLE;
@@ -27,7 +29,8 @@ Application::~Application(void)
 //-------------------------------------------------------------------------------------
 void Application::destroyScene(void)
 {
-	
+	OGRE_DELETE mTerrainGroup;
+	OGRE_DELETE mTerrainGlobals;
 }
 //-------------------------------------------------------------------------------------
 void getTerrainImage(bool flipX, bool flipY, Ogre::Image& img)
@@ -123,6 +126,11 @@ void Application::configureTerrainDefaults(Ogre::Light* light)
 //-------------------------------------------------------------------------------------
 void Application::createScene(void)
 {
+	createEditorScene();
+}
+//-------------------------------------------------------------------------------------
+void Application::createEditorScene()
+{
 	// setup camera properties
 	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
 	mCamera->setNearClipDistance(0.1f);
@@ -161,7 +169,7 @@ void Application::createScene(void)
 	Ogre::Vector3 lightdir(0.0f, 0.0f, -1.0f);
 	lightdir.normalise();
 
-	Ogre::Light* light = mSceneMgr->createLight("tstLight");
+	light = mSceneMgr->createLight("tstLight");
 	light->setType(Ogre::Light::LT_DIRECTIONAL);
 	light->setDirection(lightdir);
 	light->setDiffuseColour(Ogre::ColourValue::White);
@@ -181,7 +189,7 @@ void Application::createScene(void)
 	plantQuad = new Ogre::Rectangle2D(true);
 	plantQuad->setCorners(-1.0f, 1.0f, 1.0f, -1.0f);
 	plantQuad->setBoundingBox(Ogre::AxisAlignedBox::BOX_INFINITE);
-	Ogre::SceneNode* miniScreenNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	miniScreenNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	miniScreenNode->attachObject(plantQuad);
 
 	renderTexture->addListener(this);
@@ -256,15 +264,15 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	if (sub) sub->update(evt.timeSinceLastFrame);
 
-	mTrayMgr->showCursor();
-	
+	if(appState == PLANT_EDITOR) mTrayMgr->showCursor();
+	else mTrayMgr->hideCursor();
 
 	// update camera position - TODO: remove this when project is integrated
-	/*Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
+	Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
 	Ogre::Vector3 directionY = - (mCamera->getOrientation() * Ogre::Vector3::UNIT_Z);
 	Ogre::Vector3 newPosition = mCamera->getPosition() + directionX * cameraVelocity.x * evt.timeSinceLastFrame + 
 		directionY * cameraVelocity.y * evt.timeSinceLastFrame;
-	mCamera->setPosition(newPosition);*/
+	mCamera->setPosition(newPosition);
 
 	// update selector velocity & direction - TODO: remove this when project is integrated
 	/*if (selection != oldSelection && isSelectMoving)
@@ -326,12 +334,15 @@ extern "C" {
 bool Application::mouseMoved(const OIS::MouseEvent& evt)
 {
 	//sub->addRotations(0.13f * evt.state.X.rel, 0.13f * evt.state.Y.rel, 0.0f);
-	
-	/**CAMERA MOUSE MOVEMENT****************************************/
-	/*mCamera->yaw(Ogre::Degree(-0.13f * evt.state.X.rel));
-	mCamera->pitch(Ogre::Degree(-0.13f * evt.state.Y.rel));*/
-	/***************************************************************/
+
 	if (mTrayMgr->injectMouseMove(evt)) return true;
+	
+	if (appState == PLANT_DEMO)
+	{
+		mCamera->yaw(Ogre::Degree(-0.13f * evt.state.X.rel));
+		mCamera->pitch(Ogre::Degree(-0.13f * evt.state.Y.rel));
+	}
+
 	return true;
 }
 
@@ -436,48 +447,50 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	{
 		mShutDown = true;
 	}
-	else if (arg.key == OIS::KC_A)
+	else if (appState == PLANT_DEMO)
 	{
-		isSelectMoving = false;
-		cameraVelocity.x = -1.0f;
+		if (arg.key == OIS::KC_A)
+		{
+			cameraVelocity.x = -10.0f;
+		}
+		else if (arg.key == OIS::KC_D)
+		{
+			cameraVelocity.x = 10.0f;
+		}
+		else if (arg.key == OIS::KC_W)
+		{
+			cameraVelocity.y = 10.0f;
+		}
+		else if (arg.key == OIS::KC_S)
+		{
+			cameraVelocity.y = -10.0f;
+		}
 	}
-	else if (arg.key == OIS::KC_D)
+	else if (appState == PLANT_EDITOR)
 	{
-		isSelectMoving = false;
-		cameraVelocity.x = 1.0f;
-	}
-	else if (arg.key == OIS::KC_W)
-	{
-		isSelectMoving = false;
-		cameraVelocity.y = 1.0f;
-	}
-	else if (arg.key == OIS::KC_S)
-	{
-		isSelectMoving = false;
-		cameraVelocity.y = -1.0f;
-	}
-	else if (arg.key == OIS::KC_ADD)
-	{
-		plants[selection].numGenerations++;
-		resetPlant();
-	}
-	else if (arg.key == OIS::KC_SUBTRACT)
-	{
-		if (plants[selection].numGenerations > 0) plants[selection].numGenerations--;
-		resetPlant();
-	}
-	else if (arg.key == OIS::KC_LEFT)
-	{
-		oldSelection = selection;
-		selection = ++selection % MAX_PLANTS;
-		isSelectMoving = true;
-	}
-	else if (arg.key == OIS::KC_RIGHT)
-	{
-		oldSelection = selection;
-		if (--selection < 0)
-			selection += MAX_PLANTS;
-		isSelectMoving = true;
+		if (arg.key == OIS::KC_ADD)
+		{
+			plants[selection].numGenerations++;
+			resetPlant();
+		}
+		else if (arg.key == OIS::KC_SUBTRACT)
+		{
+			if (plants[selection].numGenerations > 0) plants[selection].numGenerations--;
+			resetPlant();
+		}
+		else if (arg.key == OIS::KC_LEFT)
+		{
+			oldSelection = selection;
+			selection = ++selection % MAX_PLANTS;
+			isSelectMoving = true;
+		}
+		else if (arg.key == OIS::KC_RIGHT)
+		{
+			oldSelection = selection;
+			if (--selection < 0)
+				selection += MAX_PLANTS;
+			isSelectMoving = true;
+		}
 	}
 
 	return true;
@@ -485,15 +498,18 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 //---------------------------------------------------------------------------
 bool Application::keyReleased(const OIS::KeyEvent &arg)
 {
-	if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
+	if (appState == PLANT_DEMO)
 	{
-		if (sub) sub->stopTurn();
-		cameraVelocity.x = 0;
-	}
-	else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
-	{
-		if (sub) sub->stopMove();
-		cameraVelocity.y = 0;
+		if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
+		{
+			if (sub) sub->stopTurn();
+			cameraVelocity.x = 0;
+		}
+		else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
+		{
+			if (sub) sub->stopMove();
+			cameraVelocity.y = 0;
+		}
 	}
 
 	return true;
@@ -523,13 +539,9 @@ void Application::sliderMoved(OgreBites::Slider* slider)
 void Application::buttonHit(OgreBites::Button* bt)
 {
 	if (bt == mGenerateButton)
-	{
 		resetPlant();
-	}
 	else if (bt == mRunDemoButton)
-	{
-
-	}
+		editorMode();
 }
 
 void Application::resetPlant()
@@ -608,11 +620,17 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 			(*it)->accept(&rendererVis);
 
 		Ogre::Real h = abs(rendererVis.getMaxHeightReached() - 49.7f);
-		mCamera->setPosition(Ogre::Vector3(1683.0f, 49.7f + h / 2, 2115.0f + h / atan(1.0f)));
+		mCamera->setPosition(Ogre::Vector3(1683.0f, 49.7f + h / 2, 0.05 + 2115.0f + h / atan(1.0f)));
 
-		plantChanged = true;
 		renderToTexture();
+		renderToTexture2();
 		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
+
+		for (std::vector<Node*>::const_iterator it = symbols.begin(); it != symbols.end(); )
+		{
+			delete *it;
+			it = symbols.erase(it);
+		}
 	}
 	else
 	{
@@ -621,31 +639,57 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 	}
 }
 
-void Application::renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& repeatThisInvocation)
-{
-
-}
-
-void Application::renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation)
-{
-	/*if (queueGroupId == 50)
-		skipThisInvocation = true;*/
-}
-
 void Application::renderToTexture(const Ogre::String& filename)
 {
 	renderTexture->update();
 	renderTexture->writeContentsToFile(filename);
 
+	// Load the image that was rendered
+	/*Ogre::String*/ texName = loadChromaKeyedTexture(filename, Ogre::ColourValue(0.0f, 0.0f, 0.0f), 
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "ck_", -1, 0.0000000000000003f);
+
 	renderMaterial =
 		Ogre::MaterialManager::getSingleton().create(
 		"RttMat",
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	//renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_REPLACE);
+	renderMaterial->getTechnique(0)->getPass(0)->setAlphaRejectSettings(Ogre::CMPF_GREATER_EQUAL, 1);
+	//renderMaterial->getTechnique(0)->getPass(0)->setCullingMode(Ogre::CULL_NONE);
+	//renderMaterial->getTechnique(0)->getPass(0)->setManualCullingMode(Ogre::MANUAL_CULL_NONE);
+	//renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+	//renderMaterial->getTechnique(0)->getPass(0)->setTextureFiltering(Ogre::TextureFilterOptions::TFO_BILINEAR);
+	renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
 
-	renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
-	renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex");
+	// Instead of the original filename of the image, use the one returned by loadChromaKeyedTexture above:
+	Ogre::TextureUnitState*  t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(texName);
+	//t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
 
 	plantQuad->setMaterial("RttMat");
+}
+
+void Application::renderToTexture2(const Ogre::String& filename)
+{
+	renderTexture->update();
+	renderTexture->writeContentsToFile(filename);
+
+	// Load the image that was rendered
+	/*Ogre::String*/ texName = loadChromaKeyedTexture(filename, Ogre::ColourValue(0.0f, 0.0f, 0.0f),
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "ck_", -1, 0.0000000000000003f);
+
+	renderMaterial =
+		Ogre::MaterialManager::getSingleton().create(
+		"RttMat2",
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+	renderMaterial->getTechnique(0)->getPass(0)->setAlphaRejectSettings(Ogre::CMPF_GREATER_EQUAL, 1);
+
+	renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
+
+	// Instead of the original filename of the image, use the one returned by loadChromaKeyedTexture above:
+	Ogre::TextureUnitState*  t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(texName);
+	//t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+
+	//plantQuad->setMaterial("RttMat2");
 }
 
 void Application::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
@@ -656,4 +700,137 @@ void Application::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
 void Application::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
 {
 	plantQuad->setVisible(true);
+}
+
+void Application::createDemoScene()
+{
+	sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
+	//sub->attachCamera(mCamera);
+
+	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
+	lightdir.normalise();
+
+	light->setType(Ogre::Light::LT_DIRECTIONAL);
+	light->setDirection(lightdir);
+	light->setDiffuseColour(Ogre::ColourValue::White);
+	light->setSpecularColour(Ogre::ColourValue(0.4f, 0.4f, 0.4f));
+
+	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.2f, 0.2f, 0.2f));
+
+	mTerrainGlobals = OGRE_NEW Ogre::TerrainGlobalOptions();
+
+	mTerrainGroup = OGRE_NEW Ogre::TerrainGroup(mSceneMgr, Ogre::Terrain::ALIGN_X_Z, 513, 12000.0f);
+	mTerrainGroup->setFilenameConvention(Ogre::String("SiameseDreamTerrain"), Ogre::String("dat"));
+	mTerrainGroup->setOrigin(Ogre::Vector3::ZERO);
+
+	Ogre::ColourValue fadeColour(0.1f, 0.1f, 0.1f);
+	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
+	mSceneMgr->setFog(Ogre::FOG_LINEAR, fadeColour, 0.0, 100, 6000);
+
+	Ogre::Plane plane;
+	plane.d = 10;
+	plane.normal = Ogre::Vector3::NEGATIVE_UNIT_Y;
+
+	mSceneMgr->setSkyPlane(true, plane, "Examples/SpaceSkyPlane", 100, 45, true, 0.5, 150, 150);
+
+	configureTerrainDefaults(light);
+
+	for (long x = 0; x <= 0; ++x)
+		for (long y = 0; y <= 0; ++y)
+			defineTerrain(x, y);
+
+	// sync load since we want everything in place when we start
+	mTerrainGroup->loadAllTerrains(true);
+
+	if (mTerrainsImported)
+	{
+		Ogre::TerrainGroup::TerrainIterator ti = mTerrainGroup->getTerrainIterator();
+		while (ti.hasMoreElements())
+		{
+			Ogre::Terrain* t = ti.getNext()->instance;
+			initBlendMaps(t);
+		}
+	}
+
+	mTerrainGroup->freeTemporaryResources();
+
+	// create a billboard
+	Ogre::SceneNode* sunBBNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("sunFlare", Ogre::Vector3(1963, 50, 1960));
+	Ogre::BillboardSet* sunBillboardSet = mSceneMgr->createBillboardSet();
+	Ogre::Billboard* sunBillboard = sunBillboardSet->createBillboard(Ogre::Vector3(0, 0, 0));
+	//sunBillboardSet->setMaterial(renderMaterial);
+	sunBillboardSet->setMaterialName("RttMat2");
+	sunBBNode->attachObject(sunBillboardSet);
+}
+
+void Application::destroyEditorScene()
+{
+	mSceneMgr->destroySceneNode(miniScreenNode);
+}
+
+void Application::editorMode()
+{
+	appState = PLANT_DEMO;
+	destroyEditorScene();
+	createDemoScene();
+}
+
+Ogre::String Application::loadChromaKeyedTexture(const Ogre::String& filename, const Ogre::ColourValue& keyCol,
+	const Ogre::String& resGroup, const Ogre::String& prefix, int numMipmaps, float threshold)
+{
+	using namespace Ogre;
+	using std::fabs;
+	Image srcImg;
+
+	loadImage(filename, filename, srcImg);
+	//srcImg.load(filename, resGroup);
+	uint width = srcImg.getWidth(), height = srcImg.getHeight();
+
+	// Since Ogre 1.6 Shoggoth, the OGRE_ALLOC_T memory macro must be used:
+	uchar* pixelData = OGRE_ALLOC_T(uchar, PixelUtil::getMemorySize(width, height, 1, PF_A8R8G8B8), MEMCATEGORY_GENERAL);
+	ulong pxDataIndex = 0, pxDataIndexStep = PixelUtil::getNumElemBytes(PF_A8R8G8B8);
+
+	for (uint y = 0; y < height; ++y)
+	{
+		for (uint x = 0; x < width; ++x)
+		{
+			ColourValue pixCol = srcImg.getColourAt(x, y, 0);
+			ColourValue diffCol = pixCol - keyCol;
+			pixCol.a = ((fabs(diffCol.r)<threshold) && (fabs(diffCol.g)<threshold) && (fabs(diffCol.b)<threshold))
+				? 0 : 1;
+			Ogre::PixelUtil::packColour(pixCol, PF_A8R8G8B8, static_cast<void*> (pixelData + pxDataIndex));
+			pxDataIndex += pxDataIndexStep;
+		}
+	}
+
+	Image chromaKeyedImg;
+	chromaKeyedImg.loadDynamicImage(pixelData, width, height, 1, PF_A8R8G8B8, true);
+	String resName = prefix + filename;
+	// You could save the chroma keyed image at this point for caching:
+	// chromaKeyedImg.save(resName); 
+	TextureManager::getSingleton().loadImage(resName, resGroup, chromaKeyedImg, TEX_TYPE_2D, numMipmaps);
+	return resName;
+}
+
+bool Application::loadImage(const Ogre::String& texture_name, const Ogre::String& texture_path, Ogre::Image& img)
+{
+	bool image_loaded = false;
+	std::ifstream ifs(texture_path.c_str(), std::ios::binary | std::ios::in);
+	if (ifs.is_open())
+	{
+		Ogre::String tex_ext;
+		Ogre::String::size_type index_of_extension = texture_path.find_last_of('.');
+		if (index_of_extension != Ogre::String::npos)
+		{
+			tex_ext = texture_path.substr(index_of_extension + 1);
+			Ogre::DataStreamPtr data_stream(new Ogre::FileStreamDataStream(texture_path, &ifs, false));
+			//Ogre::Image img;
+			img.load(data_stream, tex_ext);
+			Ogre::TextureManager::getSingleton().loadImage(texture_name,
+				Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, img, Ogre::TEX_TYPE_2D, 0, 1.0f);
+			image_loaded = true;
+		}
+		ifs.close();
+	}
+	return image_loaded;
 }

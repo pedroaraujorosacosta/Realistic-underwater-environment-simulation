@@ -6,11 +6,11 @@
 #include <Terrain/OgreTerrainGroup.h>
 #include "BaseApplication.h"
 
-#define MAX_PLANTS 2
+#define MAX_PLANTS 1
 
 class Submarine;
 
-class Application : public BaseApplication, Ogre::RenderQueueListener, public Ogre::RenderTargetListener
+class Application : public BaseApplication, public Ogre::RenderTargetListener
 {
 private:
 	Ogre::TerrainGlobalOptions* mTerrainGlobals;
@@ -47,15 +47,23 @@ private:
 	Ogre::Real	specularRed, specularGreen, specularBlue;
 	Ogre::Real  angle;
 	const Ogre::Real INIT_ANGLE;
-	bool plantChanged;
 	Ogre::Rectangle2D* plantQuad;
+	Ogre::SceneNode* miniScreenNode;
 	Ogre::RenderTexture* renderTexture;
 	Ogre::TexturePtr rttTexture;
 	Ogre::MaterialPtr renderMaterial;
+	enum AppState { PLANT_EDITOR, PLANT_DEMO} appState;
+	Ogre::Light* light;
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);
 	void configureTerrainDefaults(Ogre::Light* light);
+	Ogre::String loadChromaKeyedTexture(const Ogre::String& filename,
+		const Ogre::ColourValue& keyCol = Ogre::ColourValue::Black,
+		const Ogre::String& resGroup = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+		const Ogre::String& prefix = "ck_",
+		int numMipmaps = Ogre::MIP_DEFAULT,
+		float threshold = 0.003f);
 public:
 	Application(void);
 	virtual ~Application(void);
@@ -63,11 +71,6 @@ public:
 	// Sdk Tray listeners
 	virtual void sliderMoved(OgreBites::Slider* slider);
 	virtual void buttonHit(OgreBites::Button* bt);
-
-	virtual void renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation,
-		bool& repeatThisInvocation);
-	virtual void renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation,
-		bool& skipThisInvocation);
 
 	virtual void preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte);
 	virtual void postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte);
@@ -80,6 +83,14 @@ protected:
 	void createPlant(const std::string& filename, Plant_t& plant, SystemType type);
 	void resetPlant();
 	void renderToTexture(const Ogre::String& filename = "treeTexture.png");
+	void renderToTexture2(const Ogre::String& filename = "treeTexture.png");
+	bool loadImage(const Ogre::String& texture_name, const Ogre::String& texture_path, Ogre::Image& img);
+
+	void createEditorScene();
+	void destroyEditorScene();
+	void createDemoScene();
+
+	void editorMode();
 
 	// IO Listeners
 	virtual bool mouseMoved(const OIS::MouseEvent& evt);
