@@ -87,6 +87,7 @@
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="CompactorVisitor.cpp" />
+    <ClCompile Include="GeneratorVisitor.cpp" />
     <ClCompile Include="GrammarCompactor.cpp" />
     <ClCompile Include="GrammarGenerator.cpp" />
     <ClCompile Include="GrammarParser.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="CompactorVisitor.h" />
+    <ClInclude Include="GeneratorVisitor.h" />
     <ClInclude Include="GrammarCompactor.h" />
     <ClInclude Include="GrammarGenerator.h" />
     <ClInclude Include="GrammarParser.h" />

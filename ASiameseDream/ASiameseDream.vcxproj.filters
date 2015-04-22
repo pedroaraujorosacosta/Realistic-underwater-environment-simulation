@@ -84,6 +84,9 @@
     <ClCompile Include="CompactorVisitor.cpp">
       <Filter>Source Files\Grammar</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratorVisitor.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseApplication.h">
@@ -153,6 +156,9 @@
       <Filter>Header Files\Grammar</Filter>
     </ClInclude>
     <ClInclude Include="CompactorVisitor.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratorVisitor.h">
       <Filter>Header Files\Grammar</Filter>
     </ClInclude>
   </ItemGroup>

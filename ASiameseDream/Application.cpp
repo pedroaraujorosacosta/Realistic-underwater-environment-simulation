@@ -651,19 +651,21 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 		mat->setDiffuse(diffuseRed, diffuseGreen, diffuseBlue, 1.0f);
 		mat->setSpecular(specularRed, specularGreen, specularBlue, 1.0f);
 
-		// Renderer visitor - will create our entities according to the grammar nodes it visits
-		plant.plantNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, angle, mat);
-
 		// Evolve the generations
+		Ogre::int32 maxAge = 0;
 		for (Ogre::int32 i = 0; i < plant.numGenerations; i++)
 		{
-			GrammarGenerator::generate(grammar, symbols);
+			maxAge = GrammarGenerator::generate(grammar, symbols);
 			GrammarGenerator::printSymbols(symbols);
 		}
 
-		GrammarCompactor::compact(symbols);
-		
+		// TODO: GrammarCompactor needs to be integrated with node aging.
+		//GrammarCompactor::compact(symbols);
+
+		// Renderer visitor - will create our entities according to the grammar nodes it visits
+		plant.plantNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+		RendererVisitor rendererVis(mSceneMgr, plant.plantNode, plant.plantLocation, angle, mat, maxAge);
+
 		// Semantic processing of resulting parse tree, adding entities to ogre
 		for (std::vector<Node*>::iterator it = symbols.begin(); it != symbols.end(); it++)
 			(*it)->accept(&rendererVis);
