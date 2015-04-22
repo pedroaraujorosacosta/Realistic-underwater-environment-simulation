@@ -12,11 +12,9 @@
 
 using namespace GeneratorNodes;
 
-Ogre::String texName;
-
 //-------------------------------------------------------------------------------------
 Application::Application(void) : diffuseRed(0.0f), diffuseGreen(0.0f), diffuseBlue(0.0f), specularRed(0.0f),
-	specularGreen(0.0f), specularBlue(0.0f), INIT_ANGLE(Ogre::Math::PI / 6), appState(PLANT_EDITOR)
+	specularGreen(0.0f), specularBlue(0.0f), INIT_ANGLE(Ogre::Math::PI / 6), appState(PLANT_EDITOR), texNumber(0)
 {
 	sub = 0;
 	angle = INIT_ANGLE;
@@ -157,9 +155,10 @@ void Application::createEditorScene()
 	renderTexture->getViewport(0)->setOverlaysEnabled(false);
 	renderTexture->setAutoUpdated(false);
 
+	rttMatName = "RttMat" + Ogre::StringConverter::toString(texNumber);
 	renderMaterial =
 		Ogre::MaterialManager::getSingleton().create(
-		"RttMat",
+		rttMatName,
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 	renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
@@ -451,19 +450,19 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	{
 		if (arg.key == OIS::KC_A)
 		{
-			cameraVelocity.x = -10.0f;
+			cameraVelocity.x = -100.0f;
 		}
 		else if (arg.key == OIS::KC_D)
 		{
-			cameraVelocity.x = 10.0f;
+			cameraVelocity.x = 100.0f;
 		}
 		else if (arg.key == OIS::KC_W)
 		{
-			cameraVelocity.y = 10.0f;
+			cameraVelocity.y = 100.0f;
 		}
 		else if (arg.key == OIS::KC_S)
 		{
-			cameraVelocity.y = -10.0f;
+			cameraVelocity.y = -100.0f;
 		}
 	}
 	else if (appState == PLANT_EDITOR)
@@ -623,7 +622,6 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 		mCamera->setPosition(Ogre::Vector3(1683.0f, 49.7f + h / 2, 0.05 + 2115.0f + h / atan(1.0f)));
 
 		renderToTexture();
-		renderToTexture2();
 		mSceneMgr->destroySceneNode(plants[FRACTAL_PLANT].plantNode);
 
 		for (std::vector<Node*>::const_iterator it = symbols.begin(); it != symbols.end(); )
@@ -645,51 +643,30 @@ void Application::renderToTexture(const Ogre::String& filename)
 	renderTexture->writeContentsToFile(filename);
 
 	// Load the image that was rendered
-	/*Ogre::String*/ texName = loadChromaKeyedTexture(filename, Ogre::ColourValue(0.0f, 0.0f, 0.0f), 
-		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "ck_", -1, 0.0000000000000003f);
+	chromaTexName = loadChromaKeyedTexture(filename, Ogre::ColourValue(0.0f, 0.0f, 0.0f), 
+		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "ck_", Ogre::TextureMipmap::MIP_DEFAULT, 0.098f);
 
+	rttMatName = "RttMat" + Ogre::StringConverter::toString(texNumber);
 	renderMaterial =
 		Ogre::MaterialManager::getSingleton().create(
-		"RttMat",
+		rttMatName,
 		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	//renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_REPLACE);
 	renderMaterial->getTechnique(0)->getPass(0)->setAlphaRejectSettings(Ogre::CMPF_GREATER_EQUAL, 1);
-	//renderMaterial->getTechnique(0)->getPass(0)->setCullingMode(Ogre::CULL_NONE);
-	//renderMaterial->getTechnique(0)->getPass(0)->setManualCullingMode(Ogre::MANUAL_CULL_NONE);
-	//renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+	renderMaterial->getTechnique(0)->getPass(0)->setCullingMode(Ogre::CULL_NONE);
+	renderMaterial->getTechnique(0)->getPass(0)->setManualCullingMode(Ogre::MANUAL_CULL_NONE);
+	renderMaterial->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+	//renderMaterial->getTechnique(0)->getPass(0)->setTextureFiltering(Ogre::TextureFilterOptions::TFO_TRILINEAR);
+	//renderMaterial->getTechnique(0)->getPass(0)->setTextureFiltering(Ogre::TextureFilterOptions::TFO_ANISOTROPIC);
 	//renderMaterial->getTechnique(0)->getPass(0)->setTextureFiltering(Ogre::TextureFilterOptions::TFO_BILINEAR);
+	renderMaterial->getTechnique(0)->getPass(0)->setTextureFiltering(Ogre::TextureFilterOptions::TFO_NONE);
 	renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
+	//renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_REPLACE);
 
 	// Instead of the original filename of the image, use the one returned by loadChromaKeyedTexture above:
-	Ogre::TextureUnitState*  t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(texName);
-	//t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
+	Ogre::TextureUnitState*  t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(chromaTexName);
+	t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
 
-	plantQuad->setMaterial("RttMat");
-}
-
-void Application::renderToTexture2(const Ogre::String& filename)
-{
-	renderTexture->update();
-	renderTexture->writeContentsToFile(filename);
-
-	// Load the image that was rendered
-	/*Ogre::String*/ texName = loadChromaKeyedTexture(filename, Ogre::ColourValue(0.0f, 0.0f, 0.0f),
-		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, "ck_", -1, 0.0000000000000003f);
-
-	renderMaterial =
-		Ogre::MaterialManager::getSingleton().create(
-		"RttMat2",
-		Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-	renderMaterial->getTechnique(0)->getPass(0)->setAlphaRejectSettings(Ogre::CMPF_GREATER_EQUAL, 1);
-
-	renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
-
-	// Instead of the original filename of the image, use the one returned by loadChromaKeyedTexture above:
-	Ogre::TextureUnitState*  t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(texName);
-	//t->setTextureAddressingMode(Ogre::TextureUnitState::TAM_CLAMP);
-
-	//plantQuad->setMaterial("RttMat2");
+	plantQuad->setMaterial(rttMatName);
 }
 
 void Application::preRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
@@ -705,7 +682,7 @@ void Application::postRenderTargetUpdate(const Ogre::RenderTargetEvent& rte)
 void Application::createDemoScene()
 {
 	sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
-	//sub->attachCamera(mCamera);
+	sub->attachCamera(mCamera);
 
 	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
 	lightdir.normalise();
@@ -754,13 +731,32 @@ void Application::createDemoScene()
 
 	mTerrainGroup->freeTemporaryResources();
 
-	// create a billboard
-	Ogre::SceneNode* sunBBNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("sunFlare", Ogre::Vector3(1963, 50, 1960));
-	Ogre::BillboardSet* sunBillboardSet = mSceneMgr->createBillboardSet();
-	Ogre::Billboard* sunBillboard = sunBillboardSet->createBillboard(Ogre::Vector3(0, 0, 0));
-	//sunBillboardSet->setMaterial(renderMaterial);
-	sunBillboardSet->setMaterialName("RttMat2");
-	sunBBNode->attachObject(sunBillboardSet);
+	// create a billboard set for far objects
+	Ogre::SceneNode* farBBNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("farBillboards", Ogre::Vector3(3000, 70.0f, 1660));
+	Ogre::BillboardSet* farBillboardSet = mSceneMgr->createBillboardSet();
+	farBillboardSet->setBillboardType(Ogre::BillboardType::BBT_ORIENTED_COMMON);
+	farBillboardSet->setCommonDirection(Ogre::Vector3(0.0f, 1.0f, 0.0f));
+	farBillboardSet->createBillboard(Ogre::Vector3(0.0f, 0.0f, 0.0f));
+	farBillboardSet->createBillboard(Ogre::Vector3(-180.0f, -20.0f, 80.0f));
+	farBillboardSet->createBillboard(Ogre::Vector3(120.0f, 20.0f, -180.0f));
+	farBillboardSet->createBillboard(Ogre::Vector3(70.0f, 20.0f, -380.0f));
+	farBillboardSet->createBillboard(Ogre::Vector3(-70.0f, 50.0f, 380.0f));
+	farBillboardSet->setMaterialName(rttMatName);
+	farBillboardSet->setDefaultDimensions(50.0f, 50.0f);
+	farBBNode->attachObject(farBillboardSet);
+
+	// create a billboard set for mid distance objects
+	Ogre::SceneNode* midBBNode = mSceneMgr->getRootSceneNode()->createChildSceneNode("midBillboards", Ogre::Vector3(2500, 70.0f, 1660));
+	Ogre::BillboardSet* midBillboardSet = mSceneMgr->createBillboardSet();
+	midBillboardSet->setBillboardType(Ogre::BillboardType::BBT_ORIENTED_COMMON);
+	midBillboardSet->setCommonDirection(Ogre::Vector3(0.0f, 1.0f, 0.0f));
+	midBillboardSet->createBillboard(Ogre::Vector3(0.0f, -40.0f, 40.0f));
+	midBillboardSet->createBillboard(Ogre::Vector3(-80.0f, -42.0f, 120.0f));
+	midBillboardSet->createBillboard(Ogre::Vector3(120.0f, -20.0f, -180.0f));
+	midBillboardSet->createBillboard(Ogre::Vector3(70.0f, -30.0f, -280.0f));
+	midBillboardSet->setMaterialName(rttMatName);
+	midBillboardSet->setDefaultDimensions(50.0f, 50.0f);
+	midBBNode->attachObject(midBillboardSet);
 }
 
 void Application::destroyEditorScene()
@@ -805,7 +801,7 @@ Ogre::String Application::loadChromaKeyedTexture(const Ogre::String& filename, c
 
 	Image chromaKeyedImg;
 	chromaKeyedImg.loadDynamicImage(pixelData, width, height, 1, PF_A8R8G8B8, true);
-	String resName = prefix + filename;
+	String resName = prefix + filename + Ogre::StringConverter::toString(++texNumber);
 	// You could save the chroma keyed image at this point for caching:
 	// chromaKeyedImg.save(resName); 
 	TextureManager::getSingleton().loadImage(resName, resGroup, chromaKeyedImg, TEX_TYPE_2D, numMipmaps);

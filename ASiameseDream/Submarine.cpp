@@ -18,7 +18,7 @@ Submarine::Submarine(Ogre::SceneManager* sceneMgr, const Ogre::Vector3& position
 	meshNode->setScale(0.01f, 0.01f, 0.01f);
 	meshNode->setPosition(0.0f, 0.0f, 0.0f);
 	camNode = subNode->createChildSceneNode();
-	camNode->setPosition(30.0f, 10.0f, 0.0f);
+	camNode->setPosition(-30.0f, 10.0f, 0.0f);
 	camNode->setOrientation(Ogre::Quaternion(Ogre::Radian(-Ogre::Math::PI/2), Ogre::Vector3::UNIT_Y));
 }
 
@@ -49,6 +49,8 @@ void Submarine::addRotations(Ogre::Real dYaw, Ogre::Real dPitch, Ogre::Real dRol
 
 void Submarine::attachCamera(Ogre::Camera* camera)
 {
+	camera->setPosition(0.0f, 0.0f, 0.0f);
+	camera->setOrientation(subNode->getOrientation());
 	camNode->attachObject(camera);
 }
 

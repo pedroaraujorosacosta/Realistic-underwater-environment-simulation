@@ -18,23 +18,19 @@ private:
 	OgreBites::Label* mInfoLabel;
 	bool mTerrainsImported;
 
-	// Keep our objects here
-	Submarine*		sub;
-	OgreBites::Slider* mDiffuseColorRSlider;
-	OgreBites::Slider* mDiffuseColorGSlider;
-	OgreBites::Slider* mDiffuseColorBSlider;
-	OgreBites::Slider* mSpecularColorRSlider;
-	OgreBites::Slider* mSpecularColorGSlider;
-	OgreBites::Slider* mSpecularColorBSlider;
-	OgreBites::Slider* mAngleSlider;
-	OgreBites::Slider* mNumGenerationsSlider;
-	OgreBites::Button* mGenerateButton;
-	OgreBites::Button* mRunDemoButton;
-	Ogre::Vector2	cameraVelocity; // TODO: remove this when project is integrated
-	Ogre::Real		selectVelocity; // TODO: remove this when project is integrated
-	Ogre::int32		selection;		// TODO: remove this when project is integrated
-	Ogre::int32		oldSelection;	// TODO: remove this when project is integrated
-	bool			isSelectMoving; // TODO: remove this when project is integrated
+	//******************************************************************/
+	//* Keep our objects here ******************************************/
+	//******************************************************************/
+
+	// Scene variables
+	Submarine*			sub;
+	Ogre::Rectangle2D*	plantQuad;
+	Ogre::SceneNode*	miniScreenNode;
+	Ogre::Vector2		cameraVelocity; // TODO: remove this when project is integrated
+	Ogre::Real			selectVelocity; // TODO: remove this when project is integrated
+	Ogre::int32			selection;		// TODO: remove this when project is integrated
+	Ogre::int32			oldSelection;	// TODO: remove this when project is integrated
+	bool				isSelectMoving; // TODO: remove this when project is integrated
 	enum SystemType { FRACTAL_PLANT, PYTHAGORAS_TREE };
 	struct Plant_t
 	{
@@ -43,17 +39,37 @@ private:
 		Ogre::int32		 numGenerations;
 		Ogre::Real		 maxHeight;
 	} plants[MAX_PLANTS];
+
+	// UI related vars
+	OgreBites::Slider*	mDiffuseColorRSlider;
+	OgreBites::Slider*	mDiffuseColorGSlider;
+	OgreBites::Slider*	mDiffuseColorBSlider;
+	OgreBites::Slider*	mSpecularColorRSlider;
+	OgreBites::Slider*	mSpecularColorGSlider;
+	OgreBites::Slider*	mSpecularColorBSlider;
+	OgreBites::Slider*	mAngleSlider;
+	OgreBites::Slider*	mNumGenerationsSlider;
+	OgreBites::Button*	mGenerateButton;
+	OgreBites::Button*	mRunDemoButton;
 	Ogre::Real	diffuseRed, diffuseGreen, diffuseBlue;
 	Ogre::Real	specularRed, specularGreen, specularBlue;
 	Ogre::Real  angle;
 	const Ogre::Real INIT_ANGLE;
-	Ogre::Rectangle2D* plantQuad;
-	Ogre::SceneNode* miniScreenNode;
+
+	// Render to texture vars
 	Ogre::RenderTexture* renderTexture;
 	Ogre::TexturePtr rttTexture;
+	Ogre::String chromaTexName;
+	Ogre::int32 texNumber;
+	Ogre::String rttMatName;
 	Ogre::MaterialPtr renderMaterial;
+
+	// Application state variables
 	enum AppState { PLANT_EDITOR, PLANT_DEMO} appState;
 	Ogre::Light* light;
+
+	//******************************************************************/
+	//******************************************************************/
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);
@@ -83,7 +99,6 @@ protected:
 	void createPlant(const std::string& filename, Plant_t& plant, SystemType type);
 	void resetPlant();
 	void renderToTexture(const Ogre::String& filename = "treeTexture.png");
-	void renderToTexture2(const Ogre::String& filename = "treeTexture.png");
 	bool loadImage(const Ogre::String& texture_name, const Ogre::String& texture_path, Ogre::Image& img);
 
 	void createEditorScene();
