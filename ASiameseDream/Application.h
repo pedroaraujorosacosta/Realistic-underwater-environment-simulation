@@ -41,6 +41,11 @@ private:
 	} plants[MAX_PLANTS];
 
 	// UI related vars
+	OgreBites::Slider*	mLightYawSlider;
+	OgreBites::Slider*	mLightPitchSlider;
+	OgreBites::Slider*	mAmbientColorRSlider;
+	OgreBites::Slider*	mAmbientColorGSlider;
+	OgreBites::Slider*	mAmbientColorBSlider;
 	OgreBites::Slider*	mDiffuseColorRSlider;
 	OgreBites::Slider*	mDiffuseColorGSlider;
 	OgreBites::Slider*	mDiffuseColorBSlider;
@@ -51,10 +56,14 @@ private:
 	OgreBites::Slider*	mNumGenerationsSlider;
 	OgreBites::Button*	mGenerateButton;
 	OgreBites::Button*	mRunDemoButton;
+	Ogre::Real	ambientRed, ambientGreen, ambientBlue;
 	Ogre::Real	diffuseRed, diffuseGreen, diffuseBlue;
 	Ogre::Real	specularRed, specularGreen, specularBlue;
+	Ogre::Real  lightDirYaw, lightDirPitch;
 	Ogre::Real  angle;
 	const Ogre::Real INIT_ANGLE;
+	const Ogre::Real INIT_LIGHT_YAW, INIT_LIGHT_PITCH;
+	const Ogre::Real INIT_AMBIENT_R, INIT_AMBIENT_G, INIT_AMBIENT_B;
 
 	// Render to texture vars
 	Ogre::RenderTexture* renderTexture;

@@ -13,11 +13,17 @@
 using namespace GeneratorNodes;
 
 //-------------------------------------------------------------------------------------
-Application::Application(void) : diffuseRed(0.0f), diffuseGreen(0.0f), diffuseBlue(0.0f), specularRed(0.0f),
-	specularGreen(0.0f), specularBlue(0.0f), INIT_ANGLE(Ogre::Math::PI / 6), appState(PLANT_EDITOR), texNumber(0)
+Application::Application(void) : INIT_AMBIENT_R(0.5f), INIT_AMBIENT_G(0.5f), INIT_AMBIENT_B(0.5f), diffuseRed(0.0f),
+	diffuseGreen(0.0f), diffuseBlue(0.0f), specularRed(0.0f), specularGreen(0.0f), specularBlue(0.0f),
+	INIT_ANGLE(Ogre::Math::PI / 6), appState(PLANT_EDITOR), texNumber(0), INIT_LIGHT_YAW(180.0f), INIT_LIGHT_PITCH(0.0f)
 {
 	sub = 0;
-	angle = INIT_ANGLE;
+	ambientRed = INIT_AMBIENT_R;
+	ambientGreen = INIT_AMBIENT_G;
+	ambientBlue = INIT_AMBIENT_B;
+	angle = INIT_ANGLE; 
+	lightDirYaw = INIT_LIGHT_YAW;
+	lightDirPitch = INIT_LIGHT_PITCH;
 }
 //-------------------------------------------------------------------------------------
 Application::~Application(void)
@@ -165,7 +171,8 @@ void Application::createEditorScene()
 	renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState("RttTex");
 
 	// Setup lights
-	Ogre::Vector3 lightdir(0.0f, 0.0f, -1.0f);
+	Ogre::Vector3 lightdir(Ogre::Math::Cos(lightDirPitch)*Ogre::Math::Sin(lightDirYaw),
+		Ogre::Math::Sin(lightDirPitch), Ogre::Math::Cos(lightDirYaw) * Ogre::Math::Cos(lightDirPitch));
 	lightdir.normalise();
 
 	light = mSceneMgr->createLight("tstLight");
@@ -174,7 +181,7 @@ void Application::createEditorScene()
 	light->setDiffuseColour(Ogre::ColourValue::White);
 	light->setSpecularColour(Ogre::ColourValue(0.4f, 0.4f, 0.4f));
 
-	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.1f, 0.1f, 0.1f));
+	mSceneMgr->setAmbientLight(Ogre::ColourValue(0.5f, 0.5f, 0.5f));
 
 	Ogre::ColourValue fadeColour(0.0f, 0.0f, 0.0f);
 	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
@@ -210,8 +217,32 @@ void Application::createFrameListener(void)
 	mInfoLabel->hide();
 	mTrayMgr->hideLogo();
 
-	// GUI for setting diffuse properties of tree material
+	// GUI for setting light properties
+	mTrayMgr->setTrayWidgetAlignment(OgreBites::TL_LEFT, Ogre::GuiHorizontalAlignment::GHA_CENTER);
+	mTrayMgr->createLabel(OgreBites::TL_LEFT, "TLLightDir", "Light Direction", 170.0f);
+	mLightYawSlider = mTrayMgr->createLongSlider(OgreBites::TL_LEFT, "TSLightYaw", "Yaw", 50,
+		60, 0, 359, 360);
+	mLightYawSlider->setValue(INIT_LIGHT_YAW);
+	mLightPitchSlider = mTrayMgr->createLongSlider(OgreBites::TL_LEFT, "TSLightPitch", "Pitch", 50,
+		50, -90, 90, 181);
+	mLightPitchSlider->setValue(INIT_LIGHT_PITCH);
+
+	// GUI for setting ambient properties of tree material
 	mTrayMgr->setTrayWidgetAlignment(OgreBites::TL_RIGHT, Ogre::GuiHorizontalAlignment::GHA_CENTER);
+	mTrayMgr->createLabel(OgreBites::TL_RIGHT, "TLAmbient", "Ambient", 100.0f);
+	mAmbientColorRSlider = mTrayMgr->createLongSlider(OgreBites::TL_RIGHT, "TSAmbientR", "R", 50,
+		60, 0, 255, 256);
+	mAmbientColorRSlider->setValue(INIT_AMBIENT_R * 255);
+	mAmbientColorGSlider = mTrayMgr->createLongSlider(OgreBites::TL_RIGHT, "TSAmbientG", "G", 50,
+		60, 0, 255, 256);
+	mAmbientColorGSlider->setValue(INIT_AMBIENT_G * 255);
+	mAmbientColorBSlider = mTrayMgr->createLongSlider(OgreBites::TL_RIGHT, "TSAmbientB", "B", 50,
+		60, 0, 255, 256);
+	mAmbientColorBSlider->setValue(INIT_AMBIENT_B * 255);
+
+	mTrayMgr->createSeparator(OgreBites::TL_RIGHT, "TSeparator0", 150.0f);
+
+	// GUI for setting diffuse properties of tree material
 	mTrayMgr->createLabel(OgreBites::TL_RIGHT, "TLDiffuse", "Diffuse", 100.0f);
 	mDiffuseColorRSlider = mTrayMgr->createLongSlider(OgreBites::TL_RIGHT, "TSDiffuseR", "R", 50,
 		60, 0, 255, 256);
@@ -518,7 +549,13 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 // Sdk Tray listeners
 void Application::sliderMoved(OgreBites::Slider* slider)
 {
-	if (slider == mDiffuseColorRSlider)
+	if (slider == mAmbientColorRSlider)
+		ambientRed = slider->getValue() / 255.0f;
+	else if (slider == mAmbientColorGSlider)
+		ambientGreen = slider->getValue() / 255.0f;
+	else if (slider == mAmbientColorBSlider)
+		ambientBlue = slider->getValue() / 255.0f;
+	else if (slider == mDiffuseColorRSlider)
 		diffuseRed = slider->getValue() / 255.0f;
 	else if (slider == mDiffuseColorGSlider)
 		diffuseGreen = slider->getValue() / 255.0f;
@@ -534,6 +571,10 @@ void Application::sliderMoved(OgreBites::Slider* slider)
 		angle = mAngleSlider->getValue() * Ogre::Math::PI / 180.0f;
 	else if (slider == mNumGenerationsSlider)
 		plants[FRACTAL_PLANT].numGenerations = mNumGenerationsSlider->getValue();
+	else if (slider == mLightYawSlider)
+		lightDirYaw = slider->getValue() * 2 * Ogre::Math::PI / 360.0f;
+	else if (slider == mLightPitchSlider)
+		lightDirPitch = slider->getValue() * Ogre::Math::PI / 90.0f;
 }
 void Application::buttonHit(OgreBites::Button* bt)
 {
@@ -545,6 +586,15 @@ void Application::buttonHit(OgreBites::Button* bt)
 
 void Application::resetPlant()
 {
+	// reset our lighting properties
+	// Setup lights
+	Ogre::Vector3 lightdir = Ogre::Quaternion(Ogre::Radian(lightDirYaw), Ogre::Vector3(0.0f, 1.0f, 0.0f)) *
+		Ogre::Quaternion(Ogre::Radian(lightDirPitch), Ogre::Vector3(1.0f, 0.0f, 0.0f)) * Ogre::Vector3(0.0f, 0.0f, 1.0f);
+	/*Ogre::Vector3 lightdir(Ogre::Math::Cos(lightDirPitch)*Ogre::Math::Sin(lightDirYaw),
+	Ogre::Math::Sin(lightDirPitch), Ogre::Math::Cos(lightDirYaw) * Ogre::Math::Cos(lightDirPitch));*/
+	lightdir.normalise();
+	light->setDirection(lightdir);
+
 	plants[FRACTAL_PLANT].maxHeight = 0.0f;
 	createPlant("gram5.txt", plants[FRACTAL_PLANT], FRACTAL_PLANT);
 }
@@ -597,7 +647,7 @@ void Application::createPlant(const std::string& filename, Plant_t& plant, Syste
 		Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create(Ogre::String("mat").c_str(),
 			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-		mat->setAmbient(1.0f, 1.0f, 1.0f);
+		mat->setAmbient(ambientRed, ambientGreen, ambientBlue);
 		mat->setDiffuse(diffuseRed, diffuseGreen, diffuseBlue, 1.0f);
 		mat->setSpecular(specularRed, specularGreen, specularBlue, 1.0f);
 
