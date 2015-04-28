@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Grammar">
+      <UniqueIdentifier>{bfd756ca-b461-480b-9e60-a1114d25fafd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Grammar\Nodes">
+      <UniqueIdentifier>{bf346a65-1908-4436-83af-330af4f28a15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Grammar">
+      <UniqueIdentifier>{8a56bbfe-9d35-42ac-89ee-a34a38161e74}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Grammar\Nodes">
+      <UniqueIdentifier>{a6d8b253-c0fd-48c9-bd8d-68e8f8d07168}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseApplication.cpp">
@@ -27,6 +39,54 @@
     <ClCompile Include="Submarine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GrammarGenerator.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
+    <ClCompile Include="GrammarParser.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
+    <ClCompile Include="IdentifierNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="LeftBracketNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="MinusNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="PlusNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgramNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="RightBracketNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="RuleNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="TokenSequenceNode.cpp">
+      <Filter>Source Files\Grammar\Nodes</Filter>
+    </ClCompile>
+    <ClCompile Include="RendererVisitor.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
+    <ClCompile Include="StandardOutputVisitor.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
+    <ClCompile Include="MovableText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GrammarCompactor.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
+    <ClCompile Include="CompactorVisitor.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratorVisitor.cpp">
+      <Filter>Source Files\Grammar</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseApplication.h">
@@ -40,6 +100,66 @@
     </ClInclude>
     <ClInclude Include="Submarine.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AllNodes.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="GrammarGenerator.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="GrammarParser.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="IdentifierNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="LeftBracketNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="MinusNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="PlusNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgramNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="RightBracketNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="RuleNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="TokenSequenceNode.h">
+      <Filter>Header Files\Grammar\Nodes</Filter>
+    </ClInclude>
+    <ClInclude Include="RendererVisitor.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardOutputVisitor.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="StringTokenizer.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeVisitor.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="MovableText.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GrammarCompactor.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="CompactorVisitor.h">
+      <Filter>Header Files\Grammar</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratorVisitor.h">
+      <Filter>Header Files\Grammar</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
