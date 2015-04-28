@@ -65,7 +65,7 @@ bool BaseApplication::configure(void)
     // Show the configuration dialog and initialise the system.
     // You can skip this and use root.restoreConfig() to load configuration
     // settings if you were sure there are valid ones saved in ogre.cfg.
-    if(mRoot->showConfigDialog())
+    /*if(mRoot->showConfigDialog())
     {
         // If returned true, user clicked OK so initialise.
         // Here we choose to let the system create a default rendering window by passing 'true'.
@@ -76,7 +76,55 @@ bool BaseApplication::configure(void)
     else
     {
         return false;
-    }
+    }*/
+	if (mRoot->restoreConfig())
+	{
+#if defined OIS_LINUX_PLATFORM
+		mRoot->loadPlugin("/usr/lib/OGRE/Plugin_ParticleFX");
+		mRoot->loadPlugin("/usr/lib/OGRE/Plugin_CgProgramManager");
+		mRoot->loadPlugin("/usr/lib/OGRE/Plugin_OctreeSceneManager");
+		mRoot->loadPlugin("/usr/lib/OGRE/Plugin_PCZSceneManager");
+		mRoot->loadPlugin("/usr/lib/OGRE/Plugin_OctreeZone");
+		mRoot->loadPlugin("/usr/lib/OGRE/Plugin_BSPSceneManager");
+		mRoot->loadPlugin("/usr/lib/OGRE/RenderSystem_GL");
+#endif
+
+		Ogre::RenderSystemList::const_iterator renderers = mRoot->getAvailableRenderers().begin();
+
+		while (renderers != mRoot->getAvailableRenderers().end())
+		{
+			Ogre::String rName = (*renderers)->getName();
+
+			if (rName == "OpenGL Rendering Subsystem")
+				break;
+
+			renderers++;
+		}
+
+		Ogre::RenderSystem *renderSystem = *renderers;
+		renderSystem->setConfigOption("Full Screen", "No");
+		renderSystem->setConfigOption("Video Mode", "1024 x 768 @ 32-bit colour");
+		renderSystem->setConfigOption("Display Frequency", "50 Hz");
+		renderSystem->setConfigOption("FSAA", "16");
+		renderSystem->setConfigOption("Fixed Pipeline Enabled", "Yes");
+		renderSystem->setConfigOption("RTT Preferred Mode", "FBO");
+		renderSystem->setConfigOption("VSync", "No");
+		renderSystem->setConfigOption("sRGB Gamma Conversion", "No");
+
+		mRoot->setRenderSystem(renderSystem);
+
+		// Create a render window
+		mWindow = mRoot->initialise(true, "Underwater experience demo in Ogre3D v0.1");
+
+		return true;
+	}
+	else if (mRoot->showConfigDialog())
+	{
+		mWindow = mRoot->initialise(true, "Underwater experience demo in Ogre3D v0.1");
+		return true;
+	}
+	else
+		return false;
 }
 //---------------------------------------------------------------------------
 void BaseApplication::chooseSceneManager(void)
