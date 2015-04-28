@@ -109,8 +109,8 @@ void Application::configureTerrainDefaults(Ogre::Light* light)
 //-------------------------------------------------------------------------------------
 void Application::createScene(void)
 {
-	//mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
-	//mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
+	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
+	mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
 	
 	mCamera->setNearClipDistance(0.1f);
 	mCamera->setFarClipDistance(50000.0f);
@@ -118,14 +118,8 @@ void Application::createScene(void)
 	if (mRoot->getRenderSystem()->getCapabilities()->hasCapability(Ogre::RSC_INFINITE_FAR_PLANE))
 		mCamera->setFarClipDistance(0);   // enable infinite far clip distance if we can
 
-	/*Ogre::Entity* sub = mSceneMgr->createEntity("Sub", "Sub.mesh");
-	Ogre::SceneNode* subNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-	subNode->attachObject(sub);
-	subNode->setPosition(Ogre::Vector3(1963, 50, 1660));
-	subNode->setScale(Ogre::Vector3(0.05f, 0.05f, 0.05f));*/
-
 	sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
-	sub->attachCamera(mCamera);
+	//sub->attachCamera(mCamera);
 
 	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
 	lightdir.normalise();
@@ -144,9 +138,9 @@ void Application::createScene(void)
 	mTerrainGroup->setFilenameConvention(Ogre::String("SiameseDreamTerrain"), Ogre::String("dat"));
 	mTerrainGroup->setOrigin(Ogre::Vector3::ZERO);
 
-	Ogre::ColourValue fadeColour(0.1f, 0.1f, 0.1f);
+	Ogre::ColourValue fadeColour(76.0/255.0f, 232.0/255.0f, 192.0/255.0f);
 	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
-	mSceneMgr->setFog(Ogre::FOG_LINEAR, fadeColour, 0.0, 100, 6000);
+	mSceneMgr->setFog(Ogre::FOG_LINEAR, fadeColour, 0.0, 100, 600);
 
 	Ogre::Plane plane;
 	plane.d = 10;
@@ -212,6 +206,13 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 
 	sub->update(evt.timeSinceLastFrame);
+
+	// update camera position - TODO: remove this when project is integrated
+	Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
+	Ogre::Vector3 directionY = -(mCamera->getOrientation() * Ogre::Vector3::UNIT_Z);
+	Ogre::Vector3 newPosition = mCamera->getPosition() + directionX * cameraVelocity.x * evt.timeSinceLastFrame +
+		directionY * cameraVelocity.y * evt.timeSinceLastFrame;
+	mCamera->setPosition(newPosition);
 
 	return ret;
 }
@@ -361,19 +362,23 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_A)
 	{
-		sub->turnRight(true);
+		//sub->turnRight(true);
+		cameraVelocity.x = -100.0f;
 	}
 	else if (arg.key == OIS::KC_D)
 	{
-		sub->turnRight();
+		//sub->turnRight();
+		cameraVelocity.x = 100.0f;
 	}
 	else if (arg.key == OIS::KC_W)
 	{
-		sub->moveFront();
+		//sub->moveFront();
+		cameraVelocity.y = 100.0f;
 	}
 	else if (arg.key == OIS::KC_S)
 	{
-		sub->moveFront(true);
+		//sub->moveFront(true);
+		cameraVelocity.y = -100.0f;
 	}
 
 	return true;
@@ -383,11 +388,13 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 {
 	if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
 	{
-		sub->stopTurn();
+		//sub->stopTurn();
+		cameraVelocity.x = 0;
 	}
 	else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
 	{
-		sub->stopMove();
+		//sub->stopMove();
+		cameraVelocity.y = 0;
 	}
 
 	return true;

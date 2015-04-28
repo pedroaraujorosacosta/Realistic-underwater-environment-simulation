@@ -17,7 +17,8 @@ private:
 	bool mTerrainsImported;
 
 	// Keep our objects here
-	Submarine* sub;
+	Submarine*			sub;
+	Ogre::Vector2		cameraVelocity; // TODO: remove this when project is integrated
 
 	void defineTerrain(long x, long y);
 	void initBlendMaps(Ogre::Terrain* terrain);
