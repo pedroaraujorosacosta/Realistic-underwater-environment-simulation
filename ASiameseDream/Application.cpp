@@ -713,6 +713,7 @@ void Application::renderToTexture(const Ogre::String& filename)
 	renderMaterial->getTechnique(0)->getPass(0)->setTextureFiltering(Ogre::TextureFilterOptions::TFO_NONE);
 	renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SceneBlendType::SBT_TRANSPARENT_ALPHA);
 	//renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_REPLACE);
+	//renderMaterial->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SceneBlendType::SBT_ADD);
 
 	// Instead of the original filename of the image, use the one returned by loadChromaKeyedTexture above:
 	Ogre::TextureUnitState*  t = renderMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(chromaTexName);
@@ -795,6 +796,7 @@ void Application::createDemoScene()
 	farBillboardSet->createBillboard(Ogre::Vector3(-70.0f, 50.0f, 380.0f));
 	farBillboardSet->setMaterialName(rttMatName);
 	farBillboardSet->setDefaultDimensions(50.0f, 50.0f);
+	farBillboardSet->setRenderQueueGroup(farBillboardSet->getRenderQueueGroup() + 1); ////////////////////////
 	farBBNode->attachObject(farBillboardSet);
 
 	// create a billboard set for mid distance objects
@@ -808,6 +810,7 @@ void Application::createDemoScene()
 	midBillboardSet->createBillboard(Ogre::Vector3(70.0f, -30.0f, -280.0f));
 	midBillboardSet->setMaterialName(rttMatName);
 	midBillboardSet->setDefaultDimensions(50.0f, 50.0f);
+	midBillboardSet->setRenderQueueGroup(midBillboardSet->getRenderQueueGroup() + 1); ////////////////////////
 	midBBNode->attachObject(midBillboardSet);
 }
 
