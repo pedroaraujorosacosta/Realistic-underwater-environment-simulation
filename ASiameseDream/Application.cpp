@@ -1,6 +1,5 @@
 #include "Application.h"
 #include "Submarine.h"
-#include "TextRenderer.h"
 
 //-------------------------------------------------------------------------------------
 Application::Application(void)
@@ -110,8 +109,8 @@ void Application::configureTerrainDefaults(Ogre::Light* light)
 //-------------------------------------------------------------------------------------
 void Application::createScene(void)
 {
-	mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
-	mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
+	//mCamera->setPosition(Ogre::Vector3(1683, 50, 2116));
+	//mCamera->lookAt(Ogre::Vector3(1963, 50, 1660));
 	
 	mCamera->setNearClipDistance(0.1f);
 	mCamera->setFarClipDistance(50000.0f);
@@ -119,8 +118,14 @@ void Application::createScene(void)
 	if (mRoot->getRenderSystem()->getCapabilities()->hasCapability(Ogre::RSC_INFINITE_FAR_PLANE))
 		mCamera->setFarClipDistance(0);   // enable infinite far clip distance if we can
 
+	/*Ogre::Entity* sub = mSceneMgr->createEntity("Sub", "Sub.mesh");
+	Ogre::SceneNode* subNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
+	subNode->attachObject(sub);
+	subNode->setPosition(Ogre::Vector3(1963, 50, 1660));
+	subNode->setScale(Ogre::Vector3(0.05f, 0.05f, 0.05f));*/
+
 	sub = new Submarine(mSceneMgr, Ogre::Vector3(1963, 50, 1660));
-	//sub->attachCamera(mCamera);
+	sub->attachCamera(mCamera);
 
 	Ogre::Vector3 lightdir(0.55f, -0.3f, 0.75f);
 	lightdir.normalise();
@@ -139,9 +144,9 @@ void Application::createScene(void)
 	mTerrainGroup->setFilenameConvention(Ogre::String("SiameseDreamTerrain"), Ogre::String("dat"));
 	mTerrainGroup->setOrigin(Ogre::Vector3::ZERO);
 
-	Ogre::ColourValue fadeColour(76.0f/255.0f, 212.0f/255.0f, 196.0f/255.0f);
+	Ogre::ColourValue fadeColour(0.1f, 0.1f, 0.1f);
 	mWindow->getViewport(0)->setBackgroundColour(fadeColour);
-	mSceneMgr->setFog(Ogre::FOG_LINEAR, fadeColour, 0.0, 100, 600);
+	mSceneMgr->setFog(Ogre::FOG_LINEAR, fadeColour, 0.0, 100, 6000);
 
 	Ogre::Plane plane;
 	plane.d = 10;
@@ -169,11 +174,6 @@ void Application::createScene(void)
 	}
 
 	mTerrainGroup->freeTemporaryResources();
-
-	//this is just in case we need on-screen debug stuff:
-	TextRenderer* t = new TextRenderer();
-
-	TextRenderer::getSingleton().addTextBox("txtGreeting", "Hello", 0, 0, 100, 100, Ogre::ColourValue::Green);
 }
 //-------------------------------------------------------------------------------------
 void Application::createFrameListener(void)
@@ -212,13 +212,6 @@ bool Application::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	}
 
 	sub->update(evt.timeSinceLastFrame);
-
-	// update camera position - TODO: remove this when project is integrated
-	Ogre::Vector3 directionX = mCamera->getOrientation() * Ogre::Vector3::UNIT_X;
-	Ogre::Vector3 directionY = -(mCamera->getOrientation() * Ogre::Vector3::UNIT_Z);
-	Ogre::Vector3 newPosition = mCamera->getPosition() + directionX * cameraVelocity.x * evt.timeSinceLastFrame +
-		directionY * cameraVelocity.y * evt.timeSinceLastFrame;
-	mCamera->setPosition(newPosition);
 
 	return ret;
 }
@@ -368,23 +361,19 @@ bool Application::keyPressed(const OIS::KeyEvent &arg)
 	}
 	else if (arg.key == OIS::KC_A)
 	{
-		cameraVelocity.x = -100.0f;
-		//sub->turnRight(true);
+		sub->turnRight(true);
 	}
 	else if (arg.key == OIS::KC_D)
 	{
-		cameraVelocity.x = 100.0f;
-		//sub->turnRight();
+		sub->turnRight();
 	}
 	else if (arg.key == OIS::KC_W)
 	{
-		cameraVelocity.y = 100.0f;
-		//sub->moveFront();
+		sub->moveFront();
 	}
 	else if (arg.key == OIS::KC_S)
 	{
-		cameraVelocity.y = -100.0f;
-		//sub->moveFront(true);
+		sub->moveFront(true);
 	}
 
 	return true;
@@ -394,13 +383,11 @@ bool Application::keyReleased(const OIS::KeyEvent &arg)
 {
 	if (arg.key == OIS::KC_A || arg.key == OIS::KC_D)
 	{
-		//sub->stopTurn();
-		cameraVelocity.x = 0;
+		sub->stopTurn();
 	}
 	else if (arg.key == OIS::KC_W || arg.key == OIS::KC_S)
 	{
-		//sub->stopMove();
-		cameraVelocity.y = 0;
+		sub->stopMove();
 	}
 
 	return true;

@@ -11,13 +11,10 @@ protected:
 	Ogre::Real				roll;
 	Ogre::Real				velocity;
 	Ogre::Real				turnVelocity;
-	Ogre::Real				camYaw;
 	Ogre::SceneManager*		sceneMgr;
 	Ogre::Entity*			sub;
 	Ogre::SceneNode*		subNode;
-	Ogre::SceneNode*		meshNode;
 	Ogre::SceneNode*		camNode;
-	Ogre::Camera*			camera;
 	const Ogre::Real		maxVelocity = 10.0f;
 	const Ogre::Real		maxTurnVelocity = 10.0f;
 
