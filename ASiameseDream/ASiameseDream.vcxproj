@@ -86,53 +86,17 @@
   <ItemGroup>
     <ClCompile Include="BaseApplication.cpp" />
     <ClCompile Include="Application.cpp" />
-    <ClCompile Include="CompactorVisitor.cpp" />
-    <ClCompile Include="GeneratorVisitor.cpp" />
-    <ClCompile Include="GrammarCompactor.cpp" />
-    <ClCompile Include="GrammarGenerator.cpp" />
-    <ClCompile Include="GrammarParser.cpp" />
-    <ClCompile Include="IdentifierNode.cpp" />
-    <ClCompile Include="LeftBracketNode.cpp" />
-    <ClCompile Include="MinusNode.cpp" />
-    <ClCompile Include="MovableText.cpp" />
-    <ClCompile Include="PlusNode.cpp" />
-    <ClCompile Include="ProgramNode.cpp" />
-    <ClCompile Include="RendererVisitor.cpp" />
-    <ClCompile Include="RightBracketNode.cpp" />
-    <ClCompile Include="RuleNode.cpp" />
-    <ClCompile Include="StandardOutputVisitor.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Submarine.cpp" />
-    <ClCompile Include="TokenSequenceNode.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AllNodes.h" />
     <ClInclude Include="BaseApplication.h" />
     <ClInclude Include="Application.h" />
-    <ClInclude Include="CompactorVisitor.h" />
-    <ClInclude Include="GeneratorVisitor.h" />
-    <ClInclude Include="GrammarCompactor.h" />
-    <ClInclude Include="GrammarGenerator.h" />
-    <ClInclude Include="GrammarParser.h" />
-    <ClInclude Include="IdentifierNode.h" />
-    <ClInclude Include="LeftBracketNode.h" />
-    <ClInclude Include="MinusNode.h" />
-    <ClInclude Include="MovableText.h" />
-    <ClInclude Include="Node.h" />
-    <ClInclude Include="NodeVisitor.h" />
-    <ClInclude Include="PlusNode.h" />
-    <ClInclude Include="ProgramNode.h" />
-    <ClInclude Include="RendererVisitor.h" />
-    <ClInclude Include="RightBracketNode.h" />
-    <ClInclude Include="RuleNode.h" />
-    <ClInclude Include="StandardOutputVisitor.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="StringTokenizer.h" />
     <ClInclude Include="Submarine.h" />
-    <ClInclude Include="TokenSequenceNode.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
